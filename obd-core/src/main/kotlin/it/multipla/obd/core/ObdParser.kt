@@ -35,7 +35,8 @@ object ObdParser {
             responseStarted = true
             if (line == "NO DATA") throw NoDataException()
             if (line == "?" || listOf("UNABLE TO CONNECT", "ERROR", "STOPPED", "BUFFER FULL")
-                    .any { line.contains(it) }) {
+                    .any { line.contains(it) }
+            ) {
                 throw ElmResponseException("Risposta adattatore: $line")
             }
             if (line.matches(Regex("[0-9A-F]{3}"))) {

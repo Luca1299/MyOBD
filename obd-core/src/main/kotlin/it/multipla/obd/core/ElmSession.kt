@@ -9,7 +9,9 @@ data class EngineStatus(val mil: Boolean, val confirmedCount: Int)
 data class Reading(val pid: Int, val label: String, val display: String)
 
 enum class DtcKind(val service: Int, val label: String) {
-    STORED(0x03, "Memorizzati"), PENDING(0x07, "In attesa"), PERMANENT(0x0A, "Permanenti")
+    STORED(0x03, "Memorizzati"),
+    PENDING(0x07, "In attesa"),
+    PERMANENT(0x0A, "Permanenti"),
 }
 
 data class Parameter(val pid: Int, val label: String, val byteCount: Int, val decode: (List<Int>) -> String)
@@ -23,7 +25,7 @@ object Parameters {
         Parameter(0x06, "Correzione carburazione breve · banco 1", 1) { number((it[0] - 128) * 100.0 / 128, "%") },
         Parameter(0x07, "Correzione carburazione lunga · banco 1", 1) { number((it[0] - 128) * 100.0 / 128, "%") },
         Parameter(0x0B, "Pressione assoluta collettore", 1) { "${it[0]} kPa" },
-        Parameter(0x11, "Posizione farfalla", 1) { number(it[0] * 100.0 / 255, "%") }
+        Parameter(0x11, "Posizione farfalla", 1) { number(it[0] * 100.0 / 255, "%") },
     )
 }
 
@@ -91,7 +93,11 @@ class ElmSession(private val transport: ElmTransport, private val log: (String) 
         val protocol = atText(request("ATDP"), "ATDP")
         val number = atText(request("ATDPN"), "ATDPN").uppercase()
             .removePrefix("A").toIntOrNull(16)
-        val isCan = when (number) { in 6..9 -> true; in 1..5 -> false; else -> null }
+        val isCan = when (number) {
+            in 6..9 -> true
+            in 1..5 -> false
+            else -> null
+        }
         VehicleInfo(adapter, protocol, isCan, supported.toSet()).also { info = it }
     }
 
@@ -114,11 +120,13 @@ class ElmSession(private val transport: ElmTransport, private val log: (String) 
         ObdParser.dtcs(request("%02X".format(kind.service), 10_000), kind.service, isCan)
     }
 
-    fun close() { transport.close() }
+    fun close() {
+        transport.close()
+    }
 
     companion object {
         internal fun isAllowed(command: String): Boolean = command in setOf(
-            "ATZ", "ATI", "ATE0", "ATL0", "ATS0", "ATH0", "ATSP0", "ATDP", "ATDPN", "03", "07", "0A"
+            "ATZ", "ATI", "ATE0", "ATL0", "ATS0", "ATH0", "ATSP0", "ATDP", "ATDPN", "03", "07", "0A",
         ) || command.matches(Regex("01[0-9A-F]{2}"))
     }
 }

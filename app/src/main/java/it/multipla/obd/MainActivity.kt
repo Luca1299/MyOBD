@@ -3,14 +3,14 @@ package it.multipla.obd
 import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothManager
-import android.content.Intent
 import android.content.ComponentName
-import android.content.ServiceConnection
 import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
-import android.os.Build
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -63,9 +63,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import it.multipla.obd.core.ConnectionPhase
 import it.multipla.obd.core.Parameters
 import it.multipla.obd.core.SavedTarget
-import it.multipla.obd.core.ConnectionPhase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -85,7 +85,9 @@ class MainActivity : ComponentActivity() {
             boundService = service
             service.requestOpenFromUi()
         }
-        override fun onServiceDisconnected(name: ComponentName?) { boundService = null }
+        override fun onServiceDisconnected(name: ComponentName?) {
+            boundService = null
+        }
     }
     private fun hasConnectPermission() = checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
 
@@ -100,7 +102,10 @@ class MainActivity : ComponentActivity() {
         binding = bindService(Intent(this, DiagnosticService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
     }
     override fun onStop() {
-        if (binding) { unbindService(serviceConnection); binding = false }
+        if (binding) {
+            unbindService(serviceConnection)
+            binding = false
+        }
         boundService = null
         super.onStop()
     }
@@ -113,8 +118,11 @@ class MainActivity : ComponentActivity() {
         var tab by rememberSaveable { mutableIntStateOf(0) }
         val permissionRequest = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
             permissionEpoch++
-            if (hasConnectPermission()) boundService?.requestOpenFromUi()
-            else boundService?.session?.message("Permesso Bluetooth negato. Puoi continuare in modalità demo.")
+            if (hasConnectPermission()) {
+                boundService?.requestOpenFromUi()
+            } else {
+                boundService?.session?.message("Permesso Bluetooth negato. Puoi continuare in modalità demo.")
+            }
         }
         val save = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { uri ->
             lifecycleScope.launch {
@@ -129,7 +137,9 @@ class MainActivity : ComponentActivity() {
                         pendingExport.delete()
                     }
                     if (uri != null) boundService?.session?.message("Rapporto esportato")
-                } catch (e: Exception) { boundService?.session?.message("Esportazione non riuscita: ${e.message}") }
+                } catch (e: Exception) {
+                    boundService?.session?.message("Esportazione non riuscita: ${e.message}")
+                }
             }
         }
         val service = boundService
@@ -147,11 +157,21 @@ class MainActivity : ComponentActivity() {
         fun refresh() {
             permission = hasConnectPermission()
             notifications = Build.VERSION.SDK_INT < 33 || checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-            if (!permission) { paired = emptyList(); return }
+            if (!permission) {
+                paired = emptyList()
+                return
+            }
             try {
                 val adapter = getSystemService(BluetoothManager::class.java)?.adapter
-                if (adapter == null) { model.message("Bluetooth non disponibile su questo dispositivo"); return }
-                if (!adapter.isEnabled) { paired = emptyList(); model.message("Attiva il Bluetooth dalle impostazioni"); return }
+                if (adapter == null) {
+                    model.message("Bluetooth non disponibile su questo dispositivo")
+                    return
+                }
+                if (!adapter.isEnabled) {
+                    paired = emptyList()
+                    model.message("Attiva il Bluetooth dalle impostazioni")
+                    return
+                }
                 paired = adapter.bondedDevices.map { PairedDevice(it.name ?: "Dispositivo senza nome", it.address) }
                     .filter { it.name.equals("OBDII", ignoreCase = true) }
                     .sortedWith(compareByDescending<PairedDevice> { it.name.equals("OBDII", ignoreCase = true) }.thenBy { it.name }.thenBy { it.address })
@@ -173,19 +193,23 @@ class MainActivity : ComponentActivity() {
             onDispose { lifecycle.removeObserver(observer) }
         }
 
-        MaterialTheme(colorScheme = darkColorScheme(
-            primary = Color(0xFF73DEC1), onPrimary = Color(0xFF00382D),
-            background = Color(0xFF0D171A), surface = Color(0xFF152327),
-            surfaceVariant = Color(0xFF213238), onSurface = Color(0xFFE6F1F2)
-        )) {
+        MaterialTheme(
+            colorScheme = darkColorScheme(
+                primary = Color(0xFF73DEC1),
+                onPrimary = Color(0xFF00382D),
+                background = Color(0xFF0D171A),
+                surface = Color(0xFF152327),
+                surfaceVariant = Color(0xFF213238),
+                onSurface = Color(0xFFE6F1F2),
+            ),
+        ) {
             Scaffold { insets ->
                 Column(Modifier.fillMaxSize().padding(insets)) {
                     Column(Modifier.padding(horizontal = 22.dp, vertical = 18.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                         Text("MULTIPLA / OBD", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                         Text("2005 · benzina + metano originale", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Box(Modifier.padding(top = 5.dp).size(8.dp).background(
-                                if (state.info != null) MaterialTheme.colorScheme.primary else Color(0xFFE9BE73), CircleShape))
+                            Box(Modifier.padding(top = 5.dp).size(8.dp).background(if (state.info != null) MaterialTheme.colorScheme.primary else Color(0xFFE9BE73), CircleShape))
                             Text(state.phase, style = MaterialTheme.typography.bodySmall)
                         }
                         if (state.demo) Text("DEMO · DATI SIMULATI", color = Color(0xFFE9BE73), fontWeight = FontWeight.Bold)
@@ -206,15 +230,18 @@ class MainActivity : ComponentActivity() {
                                     Text("La sessione continua passando a un’altra app o spegnendo lo schermo. Puoi interromperla qui o dalla notifica.", style = MaterialTheme.typography.bodySmall)
                                     OutlinedButton(onClick = { startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS)) }, enabled = !state.busy) { Text("Impostazioni Bluetooth") }
                                 }
-                                if (!permission) Button(onClick = {
-                                    val requested = mutableListOf(Manifest.permission.BLUETOOTH_CONNECT)
-                                    if (Build.VERSION.SDK_INT >= 33) requested += Manifest.permission.POST_NOTIFICATIONS
-                                    permissionRequest.launch(requested.toTypedArray())
-                                }, enabled = !state.busy) { Text("Autorizza Bluetooth e notifiche") }
-                                else {
-                                    if (!notifications && Build.VERSION.SDK_INT >= 33) OutlinedButton(onClick = {
-                                        permissionRequest.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS))
-                                    }) { Text("Consenti la notifica della sessione") }
+                                if (!permission) {
+                                    Button(onClick = {
+                                        val requested = mutableListOf(Manifest.permission.BLUETOOTH_CONNECT)
+                                        if (Build.VERSION.SDK_INT >= 33) requested += Manifest.permission.POST_NOTIFICATIONS
+                                        permissionRequest.launch(requested.toTypedArray())
+                                    }, enabled = !state.busy) { Text("Autorizza Bluetooth e notifiche") }
+                                } else {
+                                    if (!notifications && Build.VERSION.SDK_INT >= 33) {
+                                        OutlinedButton(onClick = {
+                                            permissionRequest.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS))
+                                        }) { Text("Consenti la notifica della sessione") }
+                                    }
                                     Text("Dispositivi già associati", style = MaterialTheme.typography.titleMedium)
                                     if (paired.isEmpty()) Text("Nessun dispositivo disponibile. Controlla Bluetooth e associazione.")
                                     paired.forEach { device ->
@@ -229,12 +256,16 @@ class MainActivity : ComponentActivity() {
                                     TextButton(onClick = { refresh() }, enabled = !state.busy) { Text("Aggiorna elenco") }
                                     Button(enabled = selected.isNotBlank() && !state.busy && !state.connected && !state.demo, onClick = {
                                         try {
-                                            if (!hasConnectPermission()) { permission = false; model.message("Autorizzazione Bluetooth necessaria") }
-                                            else {
+                                            if (!hasConnectPermission()) {
+                                                permission = false
+                                                model.message("Autorizzazione Bluetooth necessaria")
+                                            } else {
                                                 val device = paired.firstOrNull { it.address == selected } ?: error("Seleziona un dispositivo associato")
                                                 service.requestSaveFromUi(SavedTarget(device.name, device.address))
                                             }
-                                        } catch (e: Exception) { model.message(e.message ?: "Collegamento non riuscito") }
+                                        } catch (e: Exception) {
+                                            model.message(e.message ?: "Collegamento non riuscito")
+                                        }
                                     }) { Text("Salva dispositivo OBDII") }
                                     if (state.connection.target != null && !state.connected && !state.demo) {
                                         Button(onClick = { service.requestManualFromUi() }, enabled = !state.busy) { Text("Connetti manualmente") }
@@ -254,11 +285,15 @@ class MainActivity : ComponentActivity() {
                                 }
                                 state.connection.detail?.let { Text(it, color = Color(0xFFE9BE73)) }
                                 if (state.connection.phase == ConnectionPhase.MANUAL_REQUIRED) Text("L’autoconnessione è sospesa. Premi Connetti manualmente: un collegamento riuscito la riabilita anche per le prossime aperture.")
-                                if (!state.demo) OutlinedButton(onClick = { model.demo() }, enabled = !state.busy && !state.connected) { Text("Prova con dati simulati") }
-                                else OutlinedButton(onClick = { service.requestExitDemoFromUi() }, enabled = !state.busy) { Text("Torna al dispositivo reale") }
+                                if (!state.demo) {
+                                    OutlinedButton(onClick = { model.demo() }, enabled = !state.busy && !state.connected) { Text("Prova con dati simulati") }
+                                } else {
+                                    OutlinedButton(onClick = { service.requestExitDemoFromUi() }, enabled = !state.busy) { Text("Torna al dispositivo reale") }
+                                }
                                 if (state.busy || state.connected) OutlinedButton(onClick = { model.disconnect() }) { Text("Scollega / annulla") }
                                 Text("Versione 0.2.1 · ADR-0001 / ADR-0002 · letture diagnostiche", style = MaterialTheme.typography.bodySmall)
                             }
+
                             1 -> {
                                 Text("Un campione del motore", style = MaterialTheme.typography.titleLarge)
                                 Text("Annota l’alimentazione attuale prima della lettura. L’app non la rileva automaticamente.")
@@ -289,6 +324,7 @@ class MainActivity : ComponentActivity() {
                                 }
                                 Text("Le letture sono sequenziali. Esporta il rapporto per conservare il campione prima di leggerne un altro.", style = MaterialTheme.typography.bodySmall)
                             }
+
                             2 -> {
                                 Text("Diagnostica OBD motore", style = MaterialTheme.typography.titleLarge)
                                 Text("Legge i codici restituiti attraverso l’OBD standard. I sistemi Fiat/metano dedicati richiederanno una verifica specifica.")
@@ -307,6 +343,7 @@ class MainActivity : ComponentActivity() {
                                 if (state.dtcs.isEmpty()) Text("Scansione non ancora eseguita.")
                                 Text("La cancellazione errori verrà aggiunta dopo la verifica delle letture sull’auto.", style = MaterialTheme.typography.bodySmall)
                             }
+
                             else -> {
                                 Text("Registro della sessione", style = MaterialTheme.typography.titleLarge)
                                 Text("Ultime 400 voci. Include richieste, risposte e problemi di comunicazione.")
@@ -318,7 +355,9 @@ class MainActivity : ComponentActivity() {
                                         try {
                                             withContext(Dispatchers.IO) { pendingExport.writeText(snapshot, Charsets.UTF_8) }
                                             save.launch(name)
-                                        } catch (e: Exception) { model.message("Esportazione non riuscita: ${e.message}") }
+                                        } catch (e: Exception) {
+                                            model.message("Esportazione non riuscita: ${e.message}")
+                                        }
                                     }
                                 }, enabled = !state.busy && state.logs.isNotEmpty()) { Text("Esporta rapporto .txt") }
                                 state.logs.takeLast(120).forEach { Text(it, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall) }

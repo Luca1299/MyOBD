@@ -2,26 +2,48 @@ package it.multipla.obd
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
-import android.os.*
+import android.os.Binder
+import android.os.Build
+import android.os.IBinder
+import android.os.PowerManager
 import it.multipla.obd.bluetooth.RfcommTransport
-import it.multipla.obd.core.*
-import kotlinx.coroutines.*
+import it.multipla.obd.core.ConnectionPhase
+import it.multipla.obd.core.ElmSession
+import it.multipla.obd.core.SavedTarget
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 
 open class DiagnosticService : Service() {
-    inner class LocalBinder : Binder() { val service get() = this@DiagnosticService }
+    inner class LocalBinder : Binder() {
+        val service get() = this@DiagnosticService
+    }
     private val binder = LocalBinder()
     private lateinit var scope: CoroutineScope
     lateinit var session: DiagnosticsSession
         private set
     private lateinit var store: AndroidConnectionStore
+
     @Volatile private var foreground = false
     private var lastNotification = ""
     private var wakeLock: PowerManager.WakeLock? = null
@@ -50,8 +72,11 @@ open class DiagnosticService : Service() {
                 device.name?.equals(target.name, ignoreCase = true) != true -> "Il nome del dispositivo non corrisponde al profilo salvato"
                 else -> null
             }
-        } catch (_: SecurityException) { "Autorizzazione Bluetooth necessaria"
-        } catch (_: IllegalArgumentException) { "Profilo Bluetooth non valido: seleziona nuovamente OBDII" }
+        } catch (_: SecurityException) {
+            "Autorizzazione Bluetooth necessaria"
+        } catch (_: IllegalArgumentException) {
+            "Profilo Bluetooth non valido: seleziona nuovamente OBDII"
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -59,8 +84,12 @@ open class DiagnosticService : Service() {
         val adapter = getSystemService(BluetoothManager::class.java)?.adapter ?: error("Bluetooth non disponibile")
         val transport = RfcommTransport(adapter.getRemoteDevice(target.address))
         val elm = ElmSession(transport, log)
-        try { ElmAdapterLink(elm, transport, elm.connectAdapter()) }
-        catch (e: Exception) { elm.close(); throw e }
+        try {
+            ElmAdapterLink(elm, transport, elm.connectAdapter())
+        } catch (e: Exception) {
+            elm.close()
+            throw e
+        }
     }
 
     override fun onCreate() {
@@ -69,11 +98,14 @@ open class DiagnosticService : Service() {
         store = AndroidConnectionStore(this)
         session = createSession(scope)
         getSystemService(NotificationManager::class.java).createNotificationChannel(
-            NotificationChannel(CHANNEL, "Sessione diagnostica OBD", NotificationManager.IMPORTANCE_LOW)
+            NotificationChannel(CHANNEL, "Sessione diagnostica OBD", NotificationManager.IMPORTANCE_LOW),
         )
         val filter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
-        if (Build.VERSION.SDK_INT >= 33) registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)
-        else registerReceiver(receiver, filter)
+        if (Build.VERSION.SDK_INT >= 33) {
+            registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)
+        } else {
+            registerReceiver(receiver, filter)
+        }
         scope.launch {
             session.state.collect { state ->
                 considerForegroundState()
@@ -89,21 +121,29 @@ open class DiagnosticService : Service() {
         val target = store.target()
         if (session.state.value.demo || store.manualRequired() || session.state.value.connection.phase == ConnectionPhase.STOPPED || target == null || prerequisite(target) != null) {
             session.appOpened()
-        } else startForegroundService(Intent(this, DiagnosticService::class.java).setAction(ACTION_OPEN))
+        } else {
+            startForegroundService(Intent(this, DiagnosticService::class.java).setAction(ACTION_OPEN))
+        }
     }
 
     fun requestSaveFromUi(target: SavedTarget) {
         if (hasConnectPermission() && !store.manualRequired() && prerequisite(target) == null) {
-            startForegroundService(Intent(this, DiagnosticService::class.java).setAction(ACTION_SAVE)
-                .putExtra(EXTRA_NAME, target.name).putExtra(EXTRA_ADDRESS, target.address))
-        } else session.saveTarget(target)
+            startForegroundService(
+                Intent(this, DiagnosticService::class.java).setAction(ACTION_SAVE)
+                    .putExtra(EXTRA_NAME, target.name).putExtra(EXTRA_ADDRESS, target.address),
+            )
+        } else {
+            session.saveTarget(target)
+        }
     }
 
     fun requestManualFromUi() {
         val target = store.target()
         if (target != null && prerequisite(target) == null) {
             startForegroundService(Intent(this, DiagnosticService::class.java).setAction(ACTION_MANUAL))
-        } else session.manualConnect()
+        } else {
+            session.manualConnect()
+        }
     }
 
     fun requestExitDemoFromUi() {
@@ -113,9 +153,21 @@ open class DiagnosticService : Service() {
 
     @Synchronized
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == ACTION_STOP) { session.disconnect(); releaseForeground(); return START_NOT_STICKY }
-        if (intent == null) { stopSelf(); return START_NOT_STICKY }
-        if (!hasConnectPermission()) { session.message("Permesso Bluetooth necessario"); session.disconnect(); releaseForeground(); return START_NOT_STICKY }
+        if (intent?.action == ACTION_STOP) {
+            session.disconnect()
+            releaseForeground()
+            return START_NOT_STICKY
+        }
+        if (intent == null) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
+        if (!hasConnectPermission()) {
+            session.message("Permesso Bluetooth necessario")
+            session.disconnect()
+            releaseForeground()
+            return START_NOT_STICKY
+        }
         pendingActions.incrementAndGet()
         try {
             foreground = true
@@ -124,24 +176,40 @@ open class DiagnosticService : Service() {
             startForeground(NOTIFICATION_ID, notification(text), ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE)
             val command = when (intent.action) {
                 ACTION_OPEN -> session.appOpened()
+
                 ACTION_MANUAL -> session.manualConnect()
+
                 ACTION_SAVE -> {
                     val name = intent.getStringExtra(EXTRA_NAME)
                     val address = intent.getStringExtra(EXTRA_ADDRESS)
-                    if (name != null && address != null) session.saveTarget(SavedTarget(name, address))
-                    else { session.message("Profilo Bluetooth incompleto"); null }
+                    if (name != null && address != null) {
+                        session.saveTarget(SavedTarget(name, address))
+                    } else {
+                        session.message("Profilo Bluetooth incompleto")
+                        null
+                    }
                 }
+
                 else -> null
             }
-            if (command == null) { pendingActions.decrementAndGet(); releaseForeground() }
-            else scope.launch {
-                try { command.await() }
-                finally { pendingActions.decrementAndGet(); considerForegroundState() }
+            if (command == null) {
+                pendingActions.decrementAndGet()
+                releaseForeground()
+            } else {
+                scope.launch {
+                    try {
+                        command.await()
+                    } finally {
+                        pendingActions.decrementAndGet()
+                        considerForegroundState()
+                    }
+                }
             }
         } catch (e: Exception) {
             pendingActions.decrementAndGet()
             session.message("Impossibile avviare il servizio di sessione: ${e.message}")
-            session.disconnect(); releaseForeground()
+            session.disconnect()
+            releaseForeground()
         }
         return START_NOT_STICKY
     }
@@ -173,12 +241,14 @@ open class DiagnosticService : Service() {
             getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, notification(text))
         }
     }
+
     @Synchronized
     private fun keepAwake() {
         if (wakeJob?.isActive == true) return
         val lock = wakeLock ?: (getSystemService(Context.POWER_SERVICE) as PowerManager)
             .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MultiplaOBD:session").apply {
-                setReferenceCounted(false); wakeLock = this
+                setReferenceCounted(false)
+                wakeLock = this
             }
         wakeJob = scope.launch {
             while (isActive && foreground) {
@@ -187,11 +257,14 @@ open class DiagnosticService : Service() {
             }
         }
     }
+
     @Synchronized
     private fun releaseWakeLock() {
-        wakeJob?.cancel(); wakeJob = null
+        wakeJob?.cancel()
+        wakeJob = null
         wakeLock?.let { if (it.isHeld) it.release() }
     }
+
     @Synchronized
     private fun releaseForeground() {
         foreground = false
@@ -201,7 +274,9 @@ open class DiagnosticService : Service() {
     }
     override fun onDestroy() {
         unregisterReceiver(receiver)
-        session.close(); releaseForeground(); scope.cancel()
+        session.close()
+        releaseForeground()
+        scope.cancel()
         super.onDestroy()
     }
 

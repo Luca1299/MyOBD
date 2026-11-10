@@ -19,5 +19,7 @@ class AndroidConnectionStore(context: Context) : ConnectionStore {
     override fun setManualRequired(required: Boolean) {
         check(preferences.edit().putBoolean("manual_required", required).commit()) { "Impossibile salvare lo stato della connessione" }
     }
-    companion object { const val PREFERENCES = "obd-connection-v1" }
+    companion object {
+        const val PREFERENCES = "obd-connection-v1"
+    }
 }

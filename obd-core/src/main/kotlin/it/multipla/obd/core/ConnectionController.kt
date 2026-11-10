@@ -1,8 +1,22 @@
 package it.multipla.obd.core
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import java.io.IOException
 
 data class SavedTarget(val name: String, val address: String)
@@ -16,9 +30,13 @@ interface ConnectionStore {
 
 class MemoryConnectionStore(private var saved: SavedTarget?, private var blocked: Boolean = false) : ConnectionStore {
     override fun target() = saved
-    override fun saveTarget(target: SavedTarget) { saved = target }
+    override fun saveTarget(target: SavedTarget) {
+        saved = target
+    }
     override fun manualRequired() = blocked
-    override fun setManualRequired(required: Boolean) { blocked = required }
+    override fun setManualRequired(required: Boolean) {
+        blocked = required
+    }
 }
 
 interface AdapterLink {
@@ -36,7 +54,7 @@ data class ConnectionState(
     val maxAttempts: Int = 3,
     val adapter: String? = null,
     val info: VehicleInfo? = null,
-    val detail: String? = null
+    val detail: String? = null,
 ) {
     val connected get() = phase in setOf(ConnectionPhase.PROBING_VEHICLE, ConnectionPhase.ADAPTER_READY, ConnectionPhase.VEHICLE_READY)
     val busy get() = phase in setOf(ConnectionPhase.CONNECTING, ConnectionPhase.RETRY_WAIT, ConnectionPhase.PROBING_VEHICLE)
@@ -48,7 +66,7 @@ class ConnectionController(
     private val store: ConnectionStore,
     private val prerequisites: (SavedTarget) -> String?,
     private val log: (String) -> Unit = {},
-    private val connector: suspend (SavedTarget) -> AdapterLink
+    private val connector: suspend (SavedTarget) -> AdapterLink,
 ) {
     private sealed interface Event {
         data object Open : Event
@@ -69,9 +87,12 @@ class ConnectionController(
     private val mutable = MutableStateFlow(ConnectionState())
     val state: StateFlow<ConnectionState> = mutable.asStateFlow()
     private val lifecycleLock = Any()
+
     @Volatile private var closed = false
+
     @Volatile var activeLink: AdapterLink? = null
         private set
+
     @Volatile private var generation = 0L
     private var attempt = 0
     private var automatic = true
@@ -84,13 +105,23 @@ class ConnectionController(
     init {
         scope.launch {
             for (event in events) {
-                if (closed) { if (event is Event.Ready) event.link.close(); continue }
-                try { handle(event) } catch (e: CancellationException) { throw e
+                if (closed) {
+                    if (event is Event.Ready) event.link.close()
+                    continue
+                }
+                try {
+                    handle(event)
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     halt()
                     stopped = true
-                    mutable.value = mutable.value.copy(phase = ConnectionPhase.STOPPED, info = null, adapter = null,
-                        detail = "Operazione interrotta: ${e.message}")
+                    mutable.value = mutable.value.copy(
+                        phase = ConnectionPhase.STOPPED,
+                        info = null,
+                        adapter = null,
+                        detail = "Operazione interrotta: ${e.message}",
+                    )
                 }
             }
         }
@@ -113,27 +144,35 @@ class ConnectionController(
     private suspend fun handle(event: Event) {
         when (event) {
             is Event.Barrier -> event.done.complete(Unit)
+
             Event.Open -> {
                 if (stopped || activeLink != null || mutable.value.busy) return
                 if (store.manualRequired()) {
                     log("AUTOCONNESSIONE SOSPESA · Blocco salvato; collegamento manuale richiesto")
                     manualState("Tre tentativi esauriti. Un collegamento manuale riuscito riabilita l’autoconnessione.")
-                } else begin(true)
+                } else {
+                    begin(true)
+                }
             }
+
             Event.Manual -> {
                 if (activeLink != null || mutable.value.busy) return
                 stopped = false
                 begin(false)
             }
+
             is Event.Save -> {
                 if (activeLink != null || mutable.value.busy) return
                 store.saveTarget(event.target)
                 mutable.value = mutable.value.copy(target = event.target)
             }
+
             Event.Stop -> {
-                stopped = true; halt()
+                stopped = true
+                halt()
                 mutable.value = mutable.value.copy(phase = ConnectionPhase.STOPPED, adapter = null, info = null, detail = "Sessione interrotta dall’utente")
             }
+
             is Event.Failed -> {
                 if (event.generation != generation) return
                 connectJob = null
@@ -141,7 +180,10 @@ class ConnectionController(
                 if (automatic && attempt < 3) {
                     mutable.value = mutable.value.copy(phase = ConnectionPhase.RETRY_WAIT, detail = event.message)
                     val token = generation
-                    retryJob = scope.launch { delay(3_000); events.send(Event.Retry(token)) }
+                    retryJob = scope.launch {
+                        delay(3_000)
+                        events.send(Event.Retry(token))
+                    }
                 } else if (automatic) {
                     store.setManualRequired(true)
                     log("AUTOCONNESSIONE SOSPESA · Tre tentativi automatici falliti")
@@ -150,11 +192,17 @@ class ConnectionController(
                     manualState("Collegamento manuale non riuscito: ${event.message}. Autoconnessione ancora sospesa.")
                 } else {
                     val detail = "Collegamento manuale non riuscito: ${event.message}. Autoconnessione abilitata alle prossime aperture."
-                    mutable.value = ConnectionState(ConnectionPhase.CONNECTION_FAILED, store.target(), attempt,
-                        maxAttempts = 1, detail = detail)
+                    mutable.value = ConnectionState(
+                        ConnectionPhase.CONNECTION_FAILED,
+                        store.target(),
+                        attempt,
+                        maxAttempts = 1,
+                        detail = detail,
+                    )
                     log(detail)
                 }
             }
+
             is Event.Retry -> {
                 if (event.generation == generation && mutable.value.phase == ConnectionPhase.RETRY_WAIT) {
                     retryJob = null
@@ -163,13 +211,27 @@ class ConnectionController(
                     if (issue != null) needsSetup(target, issue) else launchAttempt(target)
                 }
             }
+
             is Event.Ready -> {
-                if (event.generation != generation) { event.link.close(); return }
-                connectJob = null; retryJob?.cancel(); retryJob = null
-                val installed = synchronized(lifecycleLock) {
-                    if (closed) false else { activeLink = event.link; true }
+                if (event.generation != generation) {
+                    event.link.close()
+                    return
                 }
-                if (!installed) { event.link.close(); return }
+                connectJob = null
+                retryJob?.cancel()
+                retryJob = null
+                val installed = synchronized(lifecycleLock) {
+                    if (closed) {
+                        false
+                    } else {
+                        activeLink = event.link
+                        true
+                    }
+                }
+                if (!installed) {
+                    event.link.close()
+                    return
+                }
                 store.setManualRequired(false)
                 log("ADATTATORE COLLEGATO · ${event.link.identity}")
                 if (!automatic) log("AUTOCONNESSIONE RIABILITATA · Collegamento manuale riuscito")
@@ -178,21 +240,25 @@ class ConnectionController(
                 lossJob = scope.launch { event.link.disconnections.firstOrNull()?.let { events.send(Event.Lost(token, event.link, it)) } }
                 probe(event.link)
             }
+
             is Event.Probed -> {
                 if (event.generation != generation || activeLink !== event.link) return
                 probeJob = null
                 log(if (event.info != null) "CENTRALINA RAGGIUNTA · ${event.info.protocol}" else "CENTRALINA · ${event.issue}")
                 mutable.value = mutable.value.copy(
                     phase = if (event.info != null) ConnectionPhase.VEHICLE_READY else ConnectionPhase.ADAPTER_READY,
-                    info = event.info, detail = event.issue
+                    info = event.info,
+                    detail = event.issue,
                 )
             }
+
             is Event.Lost -> {
                 if (event.generation != generation || activeLink !== event.link) return
                 log("COLLEGAMENTO PERSO · ${event.message}")
                 halt()
                 if (!stopped) begin(true)
             }
+
             Event.ProbeAgain -> {
                 val link = activeLink ?: return
                 if (!mutable.value.busy) probe(link)
@@ -202,10 +268,18 @@ class ConnectionController(
 
     private fun begin(isAutomatic: Boolean) {
         val target = store.target()
-        if (target == null) { needsSetup(null, "Salva il dispositivo OBDII da utilizzare"); return }
+        if (target == null) {
+            needsSetup(null, "Salva il dispositivo OBDII da utilizzare")
+            return
+        }
         val issue = prerequisites(target)
-        if (issue != null) { needsSetup(target, issue); return }
-        generation++; attempt = 0; automatic = isAutomatic
+        if (issue != null) {
+            needsSetup(target, issue)
+            return
+        }
+        generation++
+        attempt = 0
+        automatic = isAutomatic
         mutable.value = ConnectionState(target = target, maxAttempts = if (automatic) 3 else 1)
         launchAttempt(target)
     }
@@ -223,10 +297,13 @@ class ConnectionController(
                 if (events.trySend(Event.Ready(token, unpublished)).isSuccess) unpublished = null
             } catch (e: TimeoutCancellationException) {
                 events.trySend(Event.Failed(token, "Tempo di collegamento scaduto"))
-            } catch (e: CancellationException) { throw e
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 events.trySend(Event.Failed(token, e.message ?: "Collegamento fallito"))
-            } finally { unpublished?.close() }
+            } finally {
+                unpublished?.close()
+            }
         }
     }
 
@@ -235,11 +312,14 @@ class ConnectionController(
         log("CENTRALINA · Verifica in corso sull’adattatore collegato")
         mutable.value = mutable.value.copy(phase = ConnectionPhase.PROBING_VEHICLE, detail = null, info = null)
         probeJob = scope.launch {
-            try { events.send(Event.Probed(token, link, link.vehicle(), null))
+            try {
+                events.send(Event.Probed(token, link, link.vehicle(), null))
             } catch (e: TimeoutCancellationException) {
                 events.trySend(Event.Lost(token, link, "Adattatore senza risposta"))
-            } catch (e: CancellationException) { throw e
-            } catch (e: IOException) { events.trySend(Event.Lost(token, link, e.message ?: "Collegamento perso"))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: IOException) {
+                events.trySend(Event.Lost(token, link, e.message ?: "Collegamento perso"))
             } catch (e: NoDataException) {
                 events.trySend(Event.Probed(token, link, null, "Centralina non raggiungibile: ${e.message}"))
             } catch (e: Exception) {
@@ -249,25 +329,35 @@ class ConnectionController(
     }
 
     private fun manualState(message: String) {
-        mutable.value = ConnectionState(ConnectionPhase.MANUAL_REQUIRED, store.target(), attempt,
-            maxAttempts = if (automatic) 3 else 1, detail = message)
+        mutable.value = ConnectionState(
+            ConnectionPhase.MANUAL_REQUIRED,
+            store.target(),
+            attempt,
+            maxAttempts = if (automatic) 3 else 1,
+            detail = message,
+        )
     }
     private fun needsSetup(target: SavedTarget?, message: String) {
         mutable.value = ConnectionState(ConnectionPhase.NEEDS_SETUP, target = target, detail = message)
     }
     private fun halt() {
         generation++
-        connectJob?.cancel(); connectJob = null
-        retryJob?.cancel(); retryJob = null
-        probeJob?.cancel(); probeJob = null
-        lossJob?.cancel(); lossJob = null
+        connectJob?.cancel()
+        connectJob = null
+        retryJob?.cancel()
+        retryJob = null
+        probeJob?.cancel()
+        probeJob = null
+        lossJob?.cancel()
+        lossJob = null
         synchronized(lifecycleLock) { activeLink.also { activeLink = null } }?.close()
     }
     fun close() {
         synchronized(lifecycleLock) {
             if (closed) return
             closed = true
-            activeLink?.close(); activeLink = null
+            activeLink?.close()
+            activeLink = null
         }
         owner.cancel()
         events.close()

@@ -1,10 +1,10 @@
 package it.multipla.obd.core
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import java.io.EOFException
 import java.io.IOException
 import java.io.InputStream
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 
 interface ElmTransport {
     val disconnects: Flow<String> get() = emptyFlow()
@@ -29,6 +29,7 @@ object PromptReader {
 
 class NoDataException(message: String = "Nessun dato ricevuto per questa richiesta") : Exception(message)
 class ElmResponseException(message: String) : Exception(message)
-class ObdNegativeResponse(val service: Int, val reason: Int) : Exception(
-    "Richiesta %02X rifiutata dalla centralina (codice %02X)".format(service, reason)
-)
+class ObdNegativeResponse(val service: Int, val reason: Int) :
+    Exception(
+        "Richiesta %02X rifiutata dalla centralina (codice %02X)".format(service, reason),
+    )

@@ -1,11 +1,15 @@
 package it.multipla.obd.core
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.io.*
+import kotlinx.coroutines.withTimeout
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
@@ -14,7 +18,7 @@ import java.util.concurrent.atomic.AtomicReference
 class PromptConnection(
     private val input: InputStream,
     private val output: OutputStream,
-    private val closeWire: () -> Unit
+    private val closeWire: () -> Unit,
 ) {
     private val closed = AtomicBoolean(false)
     private val pending = AtomicReference<CompletableDeferred<String>?>(null)
@@ -43,8 +47,11 @@ class PromptConnection(
         try {
             workers.execute {
                 try {
-                    output.write((command + "\r").toByteArray(Charsets.US_ASCII)); output.flush()
-                } catch (e: Exception) { terminate(e.message ?: "Scrittura Bluetooth fallita", true) }
+                    output.write((command + "\r").toByteArray(Charsets.US_ASCII))
+                    output.flush()
+                } catch (e: Exception) {
+                    terminate(e.message ?: "Scrittura Bluetooth fallita", true)
+                }
             }
             withTimeout(timeoutMs) { answer.await() }
         } catch (e: CancellationException) {
@@ -53,13 +60,17 @@ class PromptConnection(
         } catch (e: Exception) {
             terminate(e.message ?: "Collegamento perso", true)
             throw e
-        } finally { pending.compareAndSet(answer, null) }
+        } finally {
+            pending.compareAndSet(answer, null)
+        }
     }
 
     private fun terminate(message: String, reportLoss: Boolean) {
         if (!closed.compareAndSet(false, true)) return
         pending.getAndSet(null)?.completeExceptionally(IOException(message))
-        try { closeWire() } catch (_: Exception) { }
+        try {
+            closeWire()
+        } catch (_: Exception) { }
         if (reportLoss) losses.tryEmit(message)
         workers.shutdownNow()
     }

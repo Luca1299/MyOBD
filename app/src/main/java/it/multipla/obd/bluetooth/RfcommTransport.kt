@@ -41,7 +41,10 @@ class RfcommTransport(private val device: BluetoothDevice) : ElmTransport {
             created.connect()
             val connected = PromptConnection(created.inputStream, created.outputStream) { created.close() }
             synchronized(lock) {
-                if (closed) { connected.close(); throw IOException("Connessione annullata") }
+                if (closed) {
+                    connected.close()
+                    throw IOException("Connessione annullata")
+                }
                 wire = connected
             }
         }
@@ -72,11 +75,14 @@ class RfcommTransport(private val device: BluetoothDevice) : ElmTransport {
         val current = synchronized(lock) {
             closed = true
             val pair = wire to socket
-            wire = null; socket = null
+            wire = null
+            socket = null
             pair
         }
         current.first?.close()
-        try { current.second?.close() } catch (_: IOException) { }
+        try {
+            current.second?.close()
+        } catch (_: IOException) { }
         worker.shutdownNow()
     }
 
