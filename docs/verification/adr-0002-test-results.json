@@ -1,0 +1,220 @@
+{
+  "before": {
+    "phase": "before implementation",
+    "production_version": "0.2.0",
+    "core": [
+      {
+        "suite": "it.multipla.obd.core.AdapterInitializationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "failed_cases": []
+      },
+      {
+        "suite": "it.multipla.obd.core.ConnectionControllerTest",
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "failed_cases": []
+      },
+      {
+        "suite": "it.multipla.obd.core.ConnectionRecoveryTest",
+        "tests": 5,
+        "failures": 2,
+        "errors": 0,
+        "failed_cases": [
+          {
+            "name": "T05 one failed manual attempt cannot create an automatic lock",
+            "message": "java.lang.AssertionError"
+          },
+          {
+            "name": "T09 malformed ECU reply is a read failure and keeps the adapter connected",
+            "message": "java.lang.AssertionError"
+          }
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.core.ElmSessionTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "failed_cases": []
+      },
+      {
+        "suite": "it.multipla.obd.core.FirstConnectionTest",
+        "tests": 6,
+        "failures": 4,
+        "errors": 0,
+        "failed_cases": [
+          {
+            "name": "T02 search progress can precede data inline or across lines",
+            "message": "it.multipla.obd.core.ElmResponseException: Formato OBD non riconosciuto: ..4100BE3EB81100"
+          },
+          {
+            "name": "T03 one manual connection reaches ECU using the recorded first reply",
+            "message": "java.lang.AssertionError: expected:<VEHICLE_READY> but was:<ADAPTER_READY>"
+          },
+          {
+            "name": "T01 recorded first response preserves every data byte",
+            "message": "it.multipla.obd.core.ElmResponseException: Formato OBD non riconosciuto: ..4100BE3EB81100"
+          },
+          {
+            "name": "T02 search progress followed by NO DATA remains inconclusive",
+            "message": "java.lang.Exception: Unexpected exception, expected<it.multipla.obd.core.NoDataException> but was<it.multipla.obd.core.ElmResponseException>"
+          }
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.core.ObdParserTest",
+        "tests": 23,
+        "failures": 0,
+        "errors": 0,
+        "failed_cases": []
+      },
+      {
+        "suite": "it.multipla.obd.core.PromptConnectionTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "failed_cases": []
+      }
+    ],
+    "android": [
+      {
+        "suite": "it.multipla.obd.ConnectionDiagnosticsTest",
+        "tests": 4,
+        "failures": 3,
+        "errors": 0,
+        "failed_cases": [
+          {
+            "name": "T09 failed manual attempt with no lock reports automation still enabled",
+            "message": "java.lang.AssertionError"
+          },
+          {
+            "name": "T09 invalid response is never labelled ECU unreachable",
+            "message": "java.lang.AssertionError"
+          },
+          {
+            "name": "T09 export records attempts suspension and manual rearming",
+            "message": "java.lang.AssertionError"
+          }
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.SessionServiceTest",
+        "tests": 6,
+        "failures": 1,
+        "errors": 0,
+        "failed_cases": [
+          {
+            "name": "T05 failed unblocked manual connection stops foreground work without disabling automation",
+            "message": "java.lang.AssertionError"
+          }
+        ]
+      }
+    ]
+  },
+  "after": {
+    "phase": "after implementation",
+    "production_version": "0.2.1",
+    "core": [
+      {
+        "suite": "it.multipla.obd.core.AdapterInitializationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "it.multipla.obd.core.ConnectionControllerTest",
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "it.multipla.obd.core.ConnectionRecoveryTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "it.multipla.obd.core.ElmSessionTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "it.multipla.obd.core.FirstConnectionTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "it.multipla.obd.core.ObdParserTest",
+        "tests": 23,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "it.multipla.obd.core.PromptConnectionTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "android": [
+      {
+        "suite": "it.multipla.obd.ConnectionDiagnosticsTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      {
+        "suite": "it.multipla.obd.SessionServiceTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    ],
+    "lint": {
+      "errors": 0,
+      "warnings": 3,
+      "issues": [
+        {
+          "id": "NewerVersionAvailable",
+          "severity": "Warning"
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning"
+        },
+        {
+          "id": "UseKtx",
+          "severity": "Warning"
+        }
+      ]
+    },
+    "apk": {
+      "package": "it.multipla.obd",
+      "version_name": "0.2.1",
+      "version_code": 3,
+      "min_sdk": 31,
+      "target_sdk": 36,
+      "sha256": "db21595d512b320f34fd14a602d07b2d876951ab77de465552f43d260fcb34b1",
+      "size_bytes": 27327069,
+      "certificate_sha256": "ea6442a00c98a7f12698a9bddc77dd01b5ad862b382209177a18ca48e32e07fc",
+      "previous_certificate_sha256": "690e933b3fdbbab2d70d5aac9426bfa349afb70181d6a85b373ff24d9dbd57be",
+      "same_signer_as_0_2_0": false,
+      "internet_permission": false,
+      "zipalign_16k": true
+    }
+  }
+}
