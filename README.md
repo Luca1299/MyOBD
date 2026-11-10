@@ -1,17 +1,35 @@
-# Multipla OBD · 0.2.1
+# Multipla OBD · 0.3.2
+
+OBD significa On-Board Diagnostics; DTC significa Diagnostic Trouble Code,
+PID Parameter Identifier e TXT indica il formato di testo semplice.
 
 App Android nativa in Kotlin/Compose per Fiat Multipla 2005 benzina/metano con
 impianto originale. Dispositivo destinatario: Motorola Edge 50 Ultra con
 Android 17 dichiarato dall'utente. Adattatore previsto: NK Mini ELM327 Bluetooth
 Classic, già associato al telefono con nome **OBDII**.
 
-La versione 0.2.1 applica [ADR-0002](docs/adr/0002-primo-collegamento-e-riabilitazione-automatica.md),
-approvato da Luca il 10 novembre 2026, al collegamento definito da
-[ADR-0001](docs/adr/0001-collegamento-android-elm327.md), approvato il 9 novembre.
-Il [rapporto ADR-0002](docs/verification/adr-0002-verifica.md) riporta regressioni,
-controlli automatici e prove da ripetere sul dispositivo reale. Il
-[rapporto ADR-0001](docs/verification/adr-0001-verifica.md) resta l'evidenza storica
-della versione 0.2.0.
+La versione 0.3.2 corregge il blocco della diagnosi quando il collegamento si
+perde durante la preparazione dell’avvio. Una richiesta non accettata conserva
+l’eventuale risultato precedente e non parte alla riconnessione; resta possibile
+un nuovo avvio manuale. Prove e limiti sono nel
+[rapporto sull’avvio concorrente](docs/verification/app-D-0001-avvio-verifica.md).
+
+La versione 0.3.1 corregge le risposte diagnostiche miste, l’interruzione durante
+la finalizzazione e l’esportazione del Registro dopo letture successive.
+Il [rapporto delle correzioni](docs/verification/app-D-0001-correzioni-verifica.md)
+riporta regressioni e risultati. La conservazione dei risultati conclusi
+fino alla terminazione del processo, anche dopo Scollega, segue
+[ADR-0004](docs/adr/0004-conservazione-risultati-nel-processo.md), approvato
+dal proprietario con incarico di implementazione.
+
+La versione 0.3.0 attua la [diagnosi manuale in sola lettura](docs/design/app/D-0001-diagnosi-obd-sola-lettura/README.md),
+confermata per il coding il 10 novembre 2026. Il
+[rapporto app/D-0001](docs/verification/app-D-0001-verifica.md) separa test,
+interfaccia simulata e prove fisiche ancora necessarie. Conserva collegamento,
+riconnessione e firma della 0.2.1. I rapporti di
+[ADR-0002](docs/verification/adr-0002-verifica.md) e
+[ADR-0001](docs/verification/adr-0001-verifica.md) restano evidenze storiche delle
+versioni precedenti, non certificazioni dell’hardware corrente.
 
 ## Orientarsi nello sviluppo
 
@@ -80,28 +98,55 @@ Il comportamento effettivo a schermo spento va ancora verificato sul Motorola.
 
 ## Diagnostica disponibile
 
-- Identificazione dichiarata dall'adattatore, protocollo e PID disponibili.
-- Campione manuale dei parametri supportati: spia motore, numero di DTC
-  confermati, giri, temperatura refrigerante, velocità, correzioni carburazione
-  banco 1, pressione collettore e posizione farfalla.
-- Annotazione manuale dell'alimentazione benzina/metano.
-- DTC memorizzati (03), in attesa (07) e permanenti (0A), se disponibili.
-- Esiti non conclusivi distinti dagli elenchi di errori effettivamente vuoti.
-- Registro e rapporto TXT esportabili attraverso il selettore documenti Android.
-- Demo con dati sintetici, segnalata nell'interfaccia e nel rapporto. La demo
-  non modifica il profilo o il blocco manuale del dispositivo reale.
+Dopo che la centralina è raggiunta, aprire **Diagnosi**, annotare facoltativamente
+`Benzina`, `Metano` o `Non annotata`, e premere **Avvia diagnosi**. Il
+collegamento non avvia automaticamente la diagnosi. Sono raccolti in sequenza:
 
-L'app esegue letture. Cancellazione errori, freeze frame, storico delle scansioni,
-confronto automatico e diagnostica specifica Fiat/metano richiederanno un design
-dedicato e un ADR quando introducono una decisione durevole da motivare.
+- Spia richiesta dalla centralina, conteggio dichiarato dei codici confermati
+  e readiness dei monitor dall’ultima cancellazione.
+- Codici memorizzati (03), in attesa (07) e permanenti (0A), con categorie
+  separate. Il [catalogo locale verificato](obd-core/docs/dtc-catalog.md)
+  descrive P0133, P0171 e P0300; le altre voci mantengono il codice con
+  «Descrizione non disponibile».
+- Freeze frame 00 (02), con supporto verificato nel contesto memorizzato,
+  codice e valori restituiti. Origine delle risposte e associazioni non
+  accertabili restano esplicite; nessun valore attuale riempie dati mancanti.
+- Un campione dei sette parametri già gestiti, con unità e indisponibilità.
+
+**Completata**, **Parziale** e **Interrotta** descrivono l’acquisizione.
+Ogni sezione conserva il proprio esito: `NO DATA` o una risposta malformata
+non diventano un elenco senza guasti né una funzione non supportata.
+La diagnosi non certifica la salute della vettura o una scansione di tutte
+le centraline, e non identifica automaticamente la gestione benzina/metano.
+
+**Interrompi diagnosi** attende la richiesta corrente entro il suo timeout e
+non ne invia altre. **Scollega / annulla** nella scheda Collegamento chiude
+invece la sessione con il comando esplicito esistente. Risultati acquisiti e
+motivo restano consultabili in memoria fino alla terminazione del processo, anche dopo la distruzione del servizio.
+La riconnessione non riprende una diagnosi interrotta; serve un nuovo avvio manuale.
+
+Una nuova diagnosi sostituisce il tentativo precedente. **Esporta rapporto .txt**
+nella diagnosi conclusa salva la sua copia senza nuove letture,
+anche per risultati parziali o interrotti. Il testo contiene contesto, tempi,
+annotazione fissata all’avvio, sezioni e registro originale disponibile.
+Durante acquisizione e interruzione in corso l’esportazione è indisponibile.
+La copia temporanea nella cache privata viene rimossa dopo salvataggio o annullamento.
+
+L’esportazione dal **Registro** include il campione manuale e gli scambi
+correnti, con una sezione distinta per l’eventuale diagnosi conclusa.
+Il rapporto della diagnosi conserva il proprio contesto anche dopo nuove letture.
+
+La lettura manuale in **Parametri** resta separata e non riscrive il tentativo
+diagnostico concluso. Il contenitore in memoria conserva soltanto l’ultimo risultato concluso
+reale e quello demo, separati. Non mantiene attive connessioni o servizi;
+Android può terminare il processo ed eliminarli.
+
+La **demo** è identificata nella schermata e nel rapporto;
+non modifica profilo, blocco o risultati reali con i dati sintetici.
+
+L’app esegue solo letture. Cancellazione, attuazioni, codifica, storico,
+confronti e diagnostica specifica Fiat/metano restano fuori da questo taglio.
 Non vengono inviati Mode 04, attuazioni o codifiche alla vettura.
-
-I parametri sono letti in sequenza. Il campione successivo sostituisce quello
-precedente nell'interfaccia: esportare il rapporto per conservarlo. Cambiare
-l'etichetta benzina/metano invalida i valori del campione precedente.
-L'esportazione prepara una copia temporanea nella cache privata prima di aprire
-il selettore documenti; la copia viene rimossa dopo il salvataggio o l'annullamento.
-La demo è pensata per la prova dell'interfaccia; non certifica la connessione reale.
 
 ## Aprire e compilare
 
@@ -134,13 +179,14 @@ APK generato: `app/build/outputs/apk/debug/app-debug.apk`.
 L'APK distribuito separatamente è una build debug. La chiave originale di 0.2.0
 non è disponibile nei file recuperati: **0.2.1 ha una firma diversa e richiede
 la reinstallazione**. Esportare prima eventuali rapporti da conservare, quindi
-disinstallare 0.2.0 e installare 0.2.1. Il profilo dell'app e i permessi vanno
+disinstallare 0.2.0 e installare 0.3.2. Il profilo dell'app e i permessi vanno
 configurati nuovamente; l'associazione Bluetooth del telefono resta disponibile.
 
-La chiave debug di questa versione è inclusa in `signing/debug.keystore` e
+La chiave debug conservata dalla versione 0.2.1 è inclusa in `signing/debug.keystore` e
 configurata nel progetto (alias `androiddebugkey`, password standard `android`).
 Conservarla insieme ai sorgenti per firmare gli aggiornamenti successivi con
-la stessa chiave. Le versioni future devono anche incrementare `versionCode`.
+la stessa chiave. La 0.3.2 usa `versionCode` 6 e mantiene questa firma per aggiornare la 0.2.1.
+L’aggiornamento fisico sul Motorola resta da provare.
 
 ## Prima prova sul Motorola
 
@@ -154,9 +200,11 @@ la stessa chiave. Le versioni future devono anche incrementare `versionCode`.
    risponde e la seconda no, usare **Riprova verifica centralina** quando pronta.
 6. Passare a un'altra app e spegnere lo schermo; tornare all'app e controllare
    che la sessione sia ancora attiva. **Interrompi** nella notifica la chiude.
-7. Leggere parametri ed errori ed esportare il rapporto dalla scheda Registro.
+7. Aprire Diagnosi, annotare l’alimentazione e avviare la lettura manuale;
+   controllare gli esiti di ogni sezione ed esportare il rapporto TXT.
    Per misurare giri diversi da zero servirà il motore acceso.
-8. Eseguire i casi di retry e persistenza descritti nel rapporto di verifica.
+8. Eseguire i casi diagnostici e di continuità nel rapporto app/D-0001, oltre
+   ai casi di retry e persistenza già richiesti dai rapporti storici.
 
 La negazione delle notifiche è gestita separatamente dal permesso Bluetooth;
 la rappresentazione del servizio è soggetta alle regole Android. L'app non

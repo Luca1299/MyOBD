@@ -50,6 +50,14 @@ class DemoTransport : ElmTransport {
 
             "0A" -> "NO DATA\r>"
 
+            "020200" -> "42 02 00 01 71\r>"
+
+            "020000" -> "42 00 00 00 18 00 00\r>"
+
+            "020C00" -> "42 0C 00 10 00\r>"
+
+            "020D00" -> "42 0D 00 14\r>"
+
             else -> if (command.startsWith("AT")) "OK\r>" else "NO DATA\r>"
         }
     }

@@ -10,8 +10,8 @@ android {
         applicationId = "it.multipla.obd"
         minSdk = 31
         targetSdk = 36
-        versionCode = 3
-        versionName = "0.2.1"
+        versionCode = 6
+        versionName = "0.3.2"
     }
     signingConfigs.getByName("debug") {
         storeFile = rootProject.file("signing/debug.keystore")
@@ -43,7 +43,11 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.3")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.9.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+    testImplementation("io.cucumber:cucumber-java:7.29.0")
+    testImplementation("io.cucumber:cucumber-junit:7.29.0")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     testImplementation("org.robolectric:robolectric:4.17")
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

@@ -176,3 +176,20 @@ Feature: Manual read-only diagnosis session
     Then its results are identified as simulated
     And the real saved profile and connection block are unchanged
     And synthetic results do not overwrite real diagnosis data
+
+  @DIA-S14
+  Scenario Outline: Ended results survive service recreation within the same process
+    Dato un risultato concluso nella modalità indicata, quando Scollega arresta
+    servizio e collegamento e l’interfaccia torna dopo la ricreazione del servizio
+    nello stesso processo, il risultato e il suo contesto restano disponibili,
+    senza nuove acquisizioni diagnostiche.
+
+    Given an ended diagnosis exists in "<mode>" mode
+    When its service is stopped and recreated in the same application process
+    Then the ended result remains available in that mode
+    And restoring the result does not start a diagnostic acquisition
+
+    Examples:
+      | mode |
+      | real |
+      | demo |

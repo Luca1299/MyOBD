@@ -99,11 +99,14 @@ e quando cambia lo stato o il perimetro autorevole.
 ### App
 
 - [app/D-0001 — Diagnosi OBD motore in sola lettura](app/D-0001-diagnosi-obd-sola-lettura/README.md)
-  — `in design`, consolidato su `APPROVO` il 10 novembre 2026: avvio manuale,
+  — `confermato` dal proprietario per il coding il 10 novembre 2026, con incarico
+  di implementazione; consolidato su `APPROVO` nella stessa data: avvio manuale,
   codici con descrizioni verificate, readiness, freeze frame, campione attuale,
   esiti distinti ed esportazione TXT in sessione; scenari di design nel nucleo
-  e nell'app. Conferma per il coding ancora da ricevere; nessuna implementazione
-  o validazione hardware dichiarata.
+  e nell'app. Precisazione del punto 5 approvata il 10 novembre 2026 con
+  incarico di implementazione: ultimi risultati reali e demo nella memoria
+  del processo anche dopo l’arresto del servizio, secondo ADR-0004. Le evidenze di implementazione e le prove hardware sono distinte
+  dalla conferma della specifica.
 
 ### Nucleo diagnostico
 

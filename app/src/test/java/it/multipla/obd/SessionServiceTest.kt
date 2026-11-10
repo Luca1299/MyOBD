@@ -11,6 +11,8 @@ import it.multipla.obd.core.ElmTransport
 import it.multipla.obd.core.SavedTarget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -45,9 +47,9 @@ class SessionServiceTest {
         }
     }
     class FakeService : DiagnosticService() {
-        override fun createScope(): CoroutineScope = fixtureScope
+        override fun createScope(): CoroutineScope = CoroutineScope(fixtureScope.coroutineContext + SupervisorJob(fixtureScope.coroutineContext[Job]))
         override fun hasConnectPermission() = true
-        override fun createSession(scope: CoroutineScope): DiagnosticsSession = DiagnosticsSession(scope, fixtureStore, { null }) { _, log ->
+        override fun createSession(scope: CoroutineScope): DiagnosticsSession = DiagnosticsSession(scope, fixtureStore, { null }, results = (application as MultiplaApplication).diagnosisResults) { _, log ->
             fixtureStore.attempts++
             if (fixtureStore.failConnection) throw java.io.IOException("fuori portata")
             val demo = DemoTransport()
@@ -102,6 +104,104 @@ class SessionServiceTest {
             controller.destroy()
         }
         assertEquals(1, FakeService.closes)
+    }
+
+    @Test fun `DIA S09 service retains active diagnosis across unbind screen off and repeated open`() = runTest {
+        FakeService.fixtureScope = backgroundScope
+        FakeService.fixtureStore = Store()
+        FakeService.opens = 0
+        FakeService.closes = 0
+        val controller = Robolectric.buildService(FakeService::class.java).create()
+        val service = controller.get()
+        try {
+            service.onStartCommand(Intent().setAction(DiagnosticService.ACTION_OPEN), 0, 1)
+            advanceTimeBy(3000)
+            runCurrent()
+            service.session.startDiagnosis()
+            runCurrent()
+            val id = service.session.state.value.diagnosis!!.id
+            service.onUnbind(Intent())
+            shadowOf(service.getSystemService(Context.POWER_SERVICE) as PowerManager).setIsInteractive(false)
+            service.onBind(Intent())
+            service.onStartCommand(Intent().setAction(DiagnosticService.ACTION_OPEN), 0, 2)
+            advanceTimeBy(5000)
+            runCurrent()
+            assertEquals(id, service.session.state.value.diagnosis!!.id)
+            assertEquals(DiagnosisPhase.ENDED, service.session.state.value.diagnosis!!.phase)
+            assertEquals(1, FakeService.opens)
+            assertEquals(0, FakeService.closes)
+            assertTrue(ShadowPowerManager.getLatestWakeLock().isHeld)
+        } finally {
+            controller.destroy()
+        }
+    }
+
+    class PermissionlessDemoService : DiagnosticService() {
+        override fun createScope(): CoroutineScope = FakeService.fixtureScope
+        override fun hasConnectPermission() = false
+    }
+
+    @Test fun `demo remains a started service without Bluetooth permission while UI is unbound`() = runTest {
+        FakeService.fixtureScope = backgroundScope
+        val controller = Robolectric.buildService(PermissionlessDemoService::class.java).create()
+        val service = controller.get()
+        try {
+            service.onStartCommand(Intent().setAction("it.multipla.obd.DEMO"), 0, 1)
+            advanceTimeBy(3000)
+            runCurrent()
+            assertTrue(service.session.state.value.demo)
+            service.session.startDiagnosis()
+            advanceTimeBy(3000)
+            runCurrent()
+            val id = service.session.state.value.diagnosis!!.id
+            service.onUnbind(Intent())
+            advanceTimeBy(3000)
+            runCurrent()
+            assertFalse(shadowOf(service).isStoppedBySelf)
+            service.onBind(Intent())
+            assertEquals(id, service.session.state.value.diagnosis!!.id)
+            assertNotNull(service.session.exportDiagnosis())
+        } finally {
+            controller.destroy()
+        }
+    }
+
+    @Test fun `stopped service recreation preserves ended real and demo results in the same process`() = runTest {
+        FakeService.fixtureScope = backgroundScope
+        FakeService.fixtureStore = Store()
+        FakeService.opens = 0
+        FakeService.closes = 0
+        for (demo in listOf(false, true)) {
+            val first = Robolectric.buildService(FakeService::class.java).create()
+            val service = first.get()
+            if (demo) {
+                service.onStartCommand(Intent().setAction(DiagnosticService.ACTION_DEMO), 0, 1)
+            } else {
+                service.onStartCommand(Intent().setAction(DiagnosticService.ACTION_OPEN), 0, 1)
+            }
+            advanceTimeBy(3000)
+            runCurrent()
+            service.session.startDiagnosis()
+            advanceTimeBy(3000)
+            runCurrent()
+            val ended = service.session.state.value.diagnosis!!
+            service.onStartCommand(Intent().setAction(DiagnosticService.ACTION_STOP), 0, 2)
+            runCurrent()
+            assertTrue(shadowOf(service).isStoppedBySelf)
+            assertFalse(service.session.state.value.connected)
+            service.onUnbind(Intent())
+            first.destroy()
+            val next = Robolectric.buildService(FakeService::class.java).create()
+            try {
+                val restored = next.get().session
+                if (demo) restored.demo()
+                assertEquals(ended, restored.state.value.diagnosis)
+                assertEquals(ended.context.demo, restored.state.value.diagnosis!!.context.demo)
+                assertNotNull(restored.exportDiagnosis())
+            } finally {
+                next.destroy()
+            }
+        }
     }
 
     @Test fun `AC08 notification stop closes session and releases wake lock`() = runTest {

@@ -80,7 +80,7 @@ open class DiagnosticService : Service() {
     }
 
     @SuppressLint("MissingPermission")
-    protected open fun createSession(scope: CoroutineScope): DiagnosticsSession = DiagnosticsSession(scope, store, ::prerequisite) { target, log ->
+    protected open fun createSession(scope: CoroutineScope): DiagnosticsSession = DiagnosticsSession(scope, store, ::prerequisite, results = (application as MultiplaApplication).diagnosisResults) { target, log ->
         val adapter = getSystemService(BluetoothManager::class.java)?.adapter ?: error("Bluetooth non disponibile")
         val transport = RfcommTransport(adapter.getRemoteDevice(target.address))
         val elm = ElmSession(transport, log)
@@ -146,13 +146,23 @@ open class DiagnosticService : Service() {
         }
     }
 
+    /** Mantiene la demo nello stesso servizio anche mentre il selettore documenti copre l’Activity. */
+    fun requestDemoFromUi() {
+        startService(Intent(this, DiagnosticService::class.java).setAction(ACTION_DEMO))
+    }
+
     fun requestExitDemoFromUi() {
+        stopSelf()
         session.exitDemo()
         requestOpenFromUi()
     }
 
     @Synchronized
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == ACTION_DEMO) {
+            session.demo()
+            return START_NOT_STICKY
+        }
         if (intent?.action == ACTION_STOP) {
             session.disconnect()
             releaseForeground()
@@ -217,7 +227,12 @@ open class DiagnosticService : Service() {
     @Synchronized
     private fun considerForegroundState() {
         val connection = session.connectionState
-        if (session.state.value.demo || (pendingActions.get() == 0 && connection.phase in setOf(ConnectionPhase.MANUAL_REQUIRED, ConnectionPhase.CONNECTION_FAILED, ConnectionPhase.STOPPED))) {
+        if (session.state.value.demo && connection.phase != ConnectionPhase.STOPPED) {
+            // La demo non usa il tipo connectedDevice né richiede il permesso Bluetooth.
+            foreground = false
+            releaseWakeLock()
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } else if (pendingActions.get() == 0 && connection.phase in setOf(ConnectionPhase.MANUAL_REQUIRED, ConnectionPhase.CONNECTION_FAILED, ConnectionPhase.STOPPED)) {
             releaseForeground()
         } else if (foreground) {
             if (connection.busy || connection.connected || session.state.value.busy) keepAwake() else releaseWakeLock()
@@ -284,6 +299,7 @@ open class DiagnosticService : Service() {
         const val ACTION_OPEN = "it.multipla.obd.OPEN"
         const val ACTION_MANUAL = "it.multipla.obd.MANUAL"
         const val ACTION_SAVE = "it.multipla.obd.SAVE_TARGET"
+        const val ACTION_DEMO = "it.multipla.obd.DEMO"
         const val ACTION_STOP = "it.multipla.obd.STOP"
         private const val EXTRA_NAME = "name"
         private const val EXTRA_ADDRESS = "address"

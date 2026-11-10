@@ -1,0 +1,992 @@
+{
+  "date": "2026-11-10",
+  "version": "0.3.2",
+  "versionCode": 6,
+  "scope": "Concurrent diagnostic admission, confirmed app/D-0001",
+  "git_commands_executed": false,
+  "hardware_tested": false,
+  "open_questions": [],
+  "commands": {
+    "red": "./gradlew :app:testDebugUnitTest --tests it.multipla.obd.diagnostics.DiagnosisStartTest --console=plain",
+    "targeted_green": "./gradlew :app:testDebugUnitTest --tests it.multipla.obd.diagnostics.DiagnosisStartTest --tests it.multipla.obd.diagnostics.DiagnosisRobustnessTest --tests it.multipla.obd.DiagnosisResultsTest --tests it.multipla.obd.SessionServiceTest --console=plain",
+    "format": "./gradlew :spotlessApply --console=plain",
+    "final": "./gradlew :check :app:assembleDebug :app:lintDebug --rerun-tasks --console=plain"
+  },
+  "red": {
+    "compilation_succeeded": true,
+    "tests": 4,
+    "failures": 4,
+    "error_type": "AssertionError",
+    "cases": [
+      "transport loss before admission leaves no running diagnosis",
+      "a recovered replacement link cannot accept a request prepared for the lost link",
+      "rejected admission preserves the previous ended diagnosis and its export",
+      "transport loss while admission is published ends the diagnosis before any request"
+    ]
+  },
+  "suites": {
+    "obd-core": [
+      {
+        "name": "Automatic connection retry budget",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "Automatic connection retry budget",
+            "name": "Automatic connection stops after three failed attempts"
+          }
+        ]
+      },
+      {
+        "name": "Emission monitor readiness",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "Emission monitor readiness",
+            "name": "Valid monitor status distinguishes support and completion #1"
+          },
+          {
+            "classname": "Emission monitor readiness",
+            "name": "Valid monitor status distinguishes support and completion #2"
+          },
+          {
+            "classname": "Emission monitor readiness",
+            "name": "Valid monitor status distinguishes support and completion #3"
+          },
+          {
+            "classname": "Emission monitor readiness",
+            "name": "A malformed status response does not produce default monitor states"
+          },
+          {
+            "classname": "Emission monitor readiness",
+            "name": "Missing readiness data remains an inconclusive reading"
+          },
+          {
+            "classname": "Emission monitor readiness",
+            "name": "An unrequested engine warning lamp does not complete the monitors"
+          }
+        ]
+      },
+      {
+        "name": "Read-only diagnostic results",
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "Read-only diagnostic results",
+            "name": "A trouble code retains each reported category"
+          },
+          {
+            "classname": "Read-only diagnostic results",
+            "name": "A valid empty category is conclusive only for that category"
+          },
+          {
+            "classname": "Read-only diagnostic results",
+            "name": "An inconclusive response does not prove lack of support #1"
+          },
+          {
+            "classname": "Read-only diagnostic results",
+            "name": "An inconclusive response does not prove lack of support #2"
+          },
+          {
+            "classname": "Read-only diagnostic results",
+            "name": "An inconclusive response does not prove lack of support #3"
+          },
+          {
+            "classname": "Read-only diagnostic results",
+            "name": "Confirmed lack of support is displayed with its limit"
+          },
+          {
+            "classname": "Read-only diagnostic results",
+            "name": "The declared confirmed code count is not rebuilt from categories"
+          },
+          {
+            "classname": "Read-only diagnostic results",
+            "name": "A verified catalogue entry describes the reported code"
+          },
+          {
+            "classname": "Read-only diagnostic results",
+            "name": "An unknown description does not hide the trouble code"
+          },
+          {
+            "classname": "Read-only diagnostic results",
+            "name": "A manufacturer-specific code is not described by an unrelated entry"
+          },
+          {
+            "classname": "Read-only diagnostic results",
+            "name": "The diagnostic acquisition stays within read-only vehicle services"
+          },
+          {
+            "classname": "Read-only diagnostic results",
+            "name": "A valid zero measurement remains an acquired value"
+          }
+        ]
+      },
+      {
+        "name": "Stored diagnostic freeze frame",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "Stored diagnostic freeze frame",
+            "name": "Stored freeze frame values remain distinct from current measurements"
+          },
+          {
+            "classname": "Stored diagnostic freeze frame",
+            "name": "Valid absence of a freeze frame is distinct from a missing response"
+          },
+          {
+            "classname": "Stored diagnostic freeze frame",
+            "name": "A missing stored parameter is not replaced by current data"
+          },
+          {
+            "classname": "Stored diagnostic freeze frame",
+            "name": "Current parameter support does not determine freeze frame support"
+          },
+          {
+            "classname": "Stored diagnostic freeze frame",
+            "name": "Uncertain response provenance does not create a guessed association"
+          },
+          {
+            "classname": "Stored diagnostic freeze frame",
+            "name": "Frame acquisition time is not presented as fault occurrence time"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.core.AdapterInitializationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "it.multipla.obd.core.AdapterInitializationTest",
+            "name": "adapter remains usable when ECU initially reports NO DATA"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.core.ConnectionControllerTest",
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "AC11 failed manual action has one attempt and preserves lock"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "changing target cannot replace an active connection"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "command acknowledgement observes policy state even when repeated state is equal"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "AC06 repeated UI openings never overlap an in flight attempt"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "AC05 physical loss starts one new cycle with three total attempts"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "AC10 missing permission or disabled Bluetooth waits without attempts"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "AC08 stop closes live link and ignores its subsequent loss signal"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "AC06 opening during retry wait does not reset the budget"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "AC12 unavailable ECU keeps adapter and consumes no Bluetooth retries"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "AC04 third attempt success does not enter manual lock"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "AC09 selected identifier is preserved instead of an identically named device"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "AC08 stop cancels scheduled retries and reopening current UI does not resume them"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "AC01 opens saved target automatically and reaches vehicle"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "AC04 second attempt success cancels remaining retries"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "AC02 AC03 exactly three attempts with delays from each failure"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "AC10 missing profile does not consume attempts"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "AC08 stop cancels blocking connect and prevents a late reconnect"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "AC11 manual lock survives reopening and only explicit success clears it"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionControllerTest",
+            "name": "profile saved while idle becomes target of automatic connection"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.core.ConnectionRecoveryTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "it.multipla.obd.core.ConnectionRecoveryTest",
+            "name": "T05 one failed manual attempt cannot create an automatic lock"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionRecoveryTest",
+            "name": "T09 malformed ECU reply is a read failure and keeps the adapter connected"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionRecoveryTest",
+            "name": "T07 loss after manual recovery gets three fresh attempts and can recover again"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionRecoveryTest",
+            "name": "T08 manual adapter success rearms automation even without ECU data"
+          },
+          {
+            "classname": "it.multipla.obd.core.ConnectionRecoveryTest",
+            "name": "T06 manual success rearms the next opening without a parallel connection"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.core.DiagnosticProtocolTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "it.multipla.obd.core.DiagnosticProtocolTest",
+            "name": "continuous readiness support and completion use independent bit fields"
+          },
+          {
+            "classname": "it.multipla.obd.core.DiagnosticProtocolTest",
+            "name": "compression ignition maps monitor bits without inventing spark monitors"
+          },
+          {
+            "classname": "it.multipla.obd.core.DiagnosticProtocolTest",
+            "name": "freeze decoder rejects another frame wrong PID and malformed payloads"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.core.ElmSessionTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "it.multipla.obd.core.ElmSessionTest",
+            "name": "demo exercises discovery measurements and three error categories"
+          },
+          {
+            "classname": "it.multipla.obd.core.ElmSessionTest",
+            "name": "adapter identity without OBD response never establishes a vehicle session"
+          },
+          {
+            "classname": "it.multipla.obd.core.ElmSessionTest",
+            "name": "concurrent callers serialize their adapter commands"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.core.FirstConnectionTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "it.multipla.obd.core.FirstConnectionTest",
+            "name": "T02 search progress can precede data inline or across lines"
+          },
+          {
+            "classname": "it.multipla.obd.core.FirstConnectionTest",
+            "name": "T03 one manual connection reaches ECU using the recorded first reply"
+          },
+          {
+            "classname": "it.multipla.obd.core.FirstConnectionTest",
+            "name": "T02 search context ends with the command response"
+          },
+          {
+            "classname": "it.multipla.obd.core.FirstConnectionTest",
+            "name": "T02 progress handling never repairs corrupt or truncated data"
+          },
+          {
+            "classname": "it.multipla.obd.core.FirstConnectionTest",
+            "name": "T01 recorded first response preserves every data byte"
+          },
+          {
+            "classname": "it.multipla.obd.core.FirstConnectionTest",
+            "name": "T02 search progress followed by NO DATA remains inconclusive"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.core.FreezeFrameCommandTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "it.multipla.obd.core.FreezeFrameCommandTest",
+            "name": "approved frame zero reads are allowed while writes remain forbidden"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.core.MixedDtcResponsesTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "it.multipla.obd.core.MixedDtcResponsesTest",
+            "name": "a malformed positive payload does not erase another valid response"
+          },
+          {
+            "classname": "it.multipla.obd.core.MixedDtcResponsesTest",
+            "name": "different refusals do not prove that the whole function is unsupported"
+          },
+          {
+            "classname": "it.multipla.obd.core.MixedDtcResponsesTest",
+            "name": "positive codes survive a negative response in either order"
+          },
+          {
+            "classname": "it.multipla.obd.core.MixedDtcResponsesTest",
+            "name": "an empty positive response and a refusal remain partial"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.core.ObdParserTest",
+        "tests": 23,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "unaccounted CAN data is rejected"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "echo searching and compact PID response are accepted"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "NO DATA is inconclusive rather than an empty error list"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "ECU refusal is distinct from no errors"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "truncated CAN DTC count is rejected"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "Android 17 end of stream terminates rather than spinning"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "another PID does not count as a valid measurement"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "indexed CAN length mismatch is rejected"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "missing K line DTC byte is rejected"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "empty prompt is not a successful scan"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "multiple positive ECU responses retain all codes"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "null DTC cannot satisfy a positive CAN count"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "partial parameter response is rejected"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "missing CAN fragment is rejected"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "supported PID bits use network order and base offset"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "pending and permanent use the proper positive services"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "CAN count byte is not decoded as a DTC"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "indexed ELM CAN response is reassembled with its declared length"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "K line DTCs decode all four categories and ignore padding"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "valid K line zero response means no returned codes"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "reader stops exactly at prompt preserving the next response"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "adapter bus error is surfaced"
+          },
+          {
+            "classname": "it.multipla.obd.core.ObdParserTest",
+            "name": "response without prompt has a bounded buffer"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.core.PromptConnectionTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "it.multipla.obd.core.PromptConnectionTest",
+            "name": "timeout closes wire instead of accepting a stale response on next request"
+          },
+          {
+            "classname": "it.multipla.obd.core.PromptConnectionTest",
+            "name": "cancellation closes blocking wire and releases pending command"
+          },
+          {
+            "classname": "it.multipla.obd.core.PromptConnectionTest",
+            "name": "fragmented response is completed at prompt and command ends with CR"
+          },
+          {
+            "classname": "it.multipla.obd.core.PromptConnectionTest",
+            "name": "idle remote EOF is observed without polling the ECU"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.core.connection.AutomaticRetryTest",
+        "tests": 0,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": []
+      },
+      {
+        "name": "it.multipla.obd.core.diagnostics.DiagnosticsTest",
+        "tests": 0,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": []
+      }
+    ],
+    "app": [
+      {
+        "name": "Manual read-only diagnosis session",
+        "tests": 22,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Connection events do not start a diagnosis #1"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Connection events do not start a diagnosis #2"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Unmet diagnosis prerequisites do not start vehicle requests"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Only one diagnostic operation owns the session"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Acquisition outcome describes the readings rather than vehicle health #1"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Acquisition outcome describes the readings rather than vehicle health #2"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Acquisition outcome describes the readings rather than vehicle health #3"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Acquisition outcome describes the readings rather than vehicle health #4"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Acquisition outcome describes the readings rather than vehicle health #5"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "A local reading error preserves results from other sections"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Diagnosis interruption waits for the active request without starting another"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Explicit disconnection ends the session and retains acquired results"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Connection recovery does not resume an interrupted diagnosis"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Presentation lifecycle events do not duplicate the diagnosis #1"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Presentation lifecycle events do not duplicate the diagnosis #2"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Presentation lifecycle events do not duplicate the diagnosis #3"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "A new diagnosis does not inherit old values or late results"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Fuel annotation belongs to the acquisition that captured it"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "In-session results do not create a persistent diagnosis history"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Demo diagnosis stays isolated from the real device state"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Ended results survive service recreation within the same process #1"
+          },
+          {
+            "classname": "Manual read-only diagnosis session",
+            "name": "Ended results survive service recreation within the same process #2"
+          }
+        ]
+      },
+      {
+        "name": "Read-only diagnosis text report",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "Read-only diagnosis text report",
+            "name": "Export preserves the ended acquisition without new vehicle readings"
+          },
+          {
+            "classname": "Read-only diagnosis text report",
+            "name": "An ended incomplete diagnosis remains exportable with its limits #1"
+          },
+          {
+            "classname": "Read-only diagnosis text report",
+            "name": "An ended incomplete diagnosis remains exportable with its limits #2"
+          },
+          {
+            "classname": "Read-only diagnosis text report",
+            "name": "Export preserves unknown descriptions and response provenance"
+          },
+          {
+            "classname": "Read-only diagnosis text report",
+            "name": "A running acquisition is not exported as an ended diagnosis #1"
+          },
+          {
+            "classname": "Read-only diagnosis text report",
+            "name": "A running acquisition is not exported as an ended diagnosis #2"
+          },
+          {
+            "classname": "Read-only diagnosis text report",
+            "name": "The exported demo report remains unmistakably simulated"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.ConnectionDiagnosticsTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "it.multipla.obd.ConnectionDiagnosticsTest",
+            "name": "T09 failed manual attempt with no lock reports automation still enabled"
+          },
+          {
+            "classname": "it.multipla.obd.ConnectionDiagnosticsTest",
+            "name": "T09 invalid response is never labelled ECU unreachable"
+          },
+          {
+            "classname": "it.multipla.obd.ConnectionDiagnosticsTest",
+            "name": "T09 NO DATA remains distinct from a malformed response"
+          },
+          {
+            "classname": "it.multipla.obd.ConnectionDiagnosticsTest",
+            "name": "T09 export records attempts suspension and manual rearming"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.DiagnosisResultsTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "it.multipla.obd.DiagnosisResultsTest",
+            "name": "running acquisitions cannot be retained as completed results"
+          },
+          {
+            "classname": "it.multipla.obd.DiagnosisResultsTest",
+            "name": "new acquisitions reset visible values and obsolete ended results cannot replace the latest"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.DiagnosisUiTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "it.multipla.obd.DiagnosisUiTest",
+            "name": "active diagnosis exposes interruption and locks annotation"
+          },
+          {
+            "classname": "it.multipla.obd.DiagnosisUiTest",
+            "name": "pending interruption disables action and explains the wait"
+          },
+          {
+            "classname": "it.multipla.obd.DiagnosisUiTest",
+            "name": "ready diagnosis starts only from its main action"
+          },
+          {
+            "classname": "it.multipla.obd.DiagnosisUiTest",
+            "name": "ended partial acquisition preserves limitations and export action"
+          },
+          {
+            "classname": "it.multipla.obd.DiagnosisUiTest",
+            "name": "missing connection explains prerequisite and disables start"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.SessionServiceTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "it.multipla.obd.SessionServiceTest",
+            "name": "T05 failed unblocked manual connection stops foreground work without disabling automation"
+          },
+          {
+            "classname": "it.multipla.obd.SessionServiceTest",
+            "name": "AC06 AC07 activity unbind and rebind preserve service session and notification"
+          },
+          {
+            "classname": "it.multipla.obd.SessionServiceTest",
+            "name": "demo remains a started service without Bluetooth permission while UI is unbound"
+          },
+          {
+            "classname": "it.multipla.obd.SessionServiceTest",
+            "name": "AC08 notification stop closes session and releases wake lock"
+          },
+          {
+            "classname": "it.multipla.obd.SessionServiceTest",
+            "name": "demo session cannot clear real manual connection gate"
+          },
+          {
+            "classname": "it.multipla.obd.SessionServiceTest",
+            "name": "AC11 target and manual lock persist across Android store instances"
+          },
+          {
+            "classname": "it.multipla.obd.SessionServiceTest",
+            "name": "DIA S09 service retains active diagnosis across unbind screen off and repeated open"
+          },
+          {
+            "classname": "it.multipla.obd.SessionServiceTest",
+            "name": "T06 manual success persists rearming across Android store and session recreation"
+          },
+          {
+            "classname": "it.multipla.obd.SessionServiceTest",
+            "name": "stopped service recreation preserves ended real and demo results in the same process"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.diagnostics.DiagnosisRobustnessTest",
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "it.multipla.obd.diagnostics.DiagnosisRobustnessTest",
+            "name": "transport loss inside stored frame retains earlier frame values"
+          },
+          {
+            "classname": "it.multipla.obd.diagnostics.DiagnosisRobustnessTest",
+            "name": "interruption between stored requests preserves returned values and sends no current read"
+          },
+          {
+            "classname": "it.multipla.obd.diagnostics.DiagnosisRobustnessTest",
+            "name": "manual code export retains both a valid code and its reading limitation"
+          },
+          {
+            "classname": "it.multipla.obd.diagnostics.DiagnosisRobustnessTest",
+            "name": "interruption before the first request sends no diagnostic command"
+          },
+          {
+            "classname": "it.multipla.obd.diagnostics.DiagnosisRobustnessTest",
+            "name": "registry export includes a later manual sample without changing the diagnosis"
+          },
+          {
+            "classname": "it.multipla.obd.diagnostics.DiagnosisRobustnessTest",
+            "name": "a mixed code response makes the acquisition partial and preserves the code in export"
+          },
+          {
+            "classname": "it.multipla.obd.diagnostics.DiagnosisRobustnessTest",
+            "name": "transport loss inside current sample retains each earlier measurement"
+          },
+          {
+            "classname": "it.multipla.obd.diagnostics.DiagnosisRobustnessTest",
+            "name": "pending interruption keeps the existing command timeout and interrupts on expiry"
+          },
+          {
+            "classname": "it.multipla.obd.diagnostics.DiagnosisRobustnessTest",
+            "name": "a non cooperative old response cannot replace a later acquisition"
+          },
+          {
+            "classname": "it.multipla.obd.diagnostics.DiagnosisRobustnessTest",
+            "name": "an interruption accepted during finalization wins over a stale completion"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.diagnostics.DiagnosisStartTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          {
+            "classname": "it.multipla.obd.diagnostics.DiagnosisStartTest",
+            "name": "transport loss while admission is published ends the diagnosis before any request"
+          },
+          {
+            "classname": "it.multipla.obd.diagnostics.DiagnosisStartTest",
+            "name": "rejected admission preserves the previous ended diagnosis and its export"
+          },
+          {
+            "classname": "it.multipla.obd.diagnostics.DiagnosisStartTest",
+            "name": "a recovered replacement link cannot accept a request prepared for the lost link"
+          },
+          {
+            "classname": "it.multipla.obd.diagnostics.DiagnosisStartTest",
+            "name": "transport loss before admission leaves no running diagnosis"
+          }
+        ]
+      },
+      {
+        "name": "it.multipla.obd.diagnostics.DiagnosisTest",
+        "tests": 0,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": []
+      }
+    ]
+  },
+  "preserved_tests": {
+    "obd-core": 94,
+    "app": 59
+  },
+  "cucumber": {
+    "pilot": {
+      "scenarios": 1,
+      "steps": 7,
+      "statuses": [
+        "passed"
+      ]
+    },
+    "core": {
+      "scenarios": 24,
+      "steps": 115,
+      "statuses": [
+        "passed"
+      ]
+    },
+    "app": {
+      "scenarios": 29,
+      "steps": 142,
+      "statuses": [
+        "passed"
+      ]
+    }
+  },
+  "features_unchanged": true,
+  "lint": [
+    {
+      "id": "AndroidGradlePluginVersion",
+      "severity": "Warning"
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning"
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning"
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning"
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning"
+    },
+    {
+      "id": "NewerVersionAvailable",
+      "severity": "Warning"
+    },
+    {
+      "id": "NewerVersionAvailable",
+      "severity": "Warning"
+    },
+    {
+      "id": "NewerVersionAvailable",
+      "severity": "Warning"
+    },
+    {
+      "id": "NewerVersionAvailable",
+      "severity": "Warning"
+    },
+    {
+      "id": "UseKtx",
+      "severity": "Warning"
+    },
+    {
+      "id": "UseKtx",
+      "severity": "Warning"
+    }
+  ],
+  "ui": {
+    "compose_tests": 5,
+    "environment": "Robolectric SDK 35",
+    "result": "passed",
+    "new_emulator_visual_test": false,
+    "note": "No layout or interaction changes. Existing prerequisite, ready, running, stopping and ended states verified."
+  },
+  "apk": {
+    "path": "app/build/outputs/apk/debug/app-debug.apk",
+    "sha256": "27b8a38e7701da852530ab16c12055dfffa236811085c1aa7382ef919ff5034f",
+    "bytes": 27506089,
+    "signing_certificate_sha256": "ea6442a00c98a7f12698a9bddc77dd01b5ad862b382209177a18ca48e32e07fc"
+  },
+  "verified_inputs_sha256": {
+    "app/src/main/java/it/multipla/obd/DiagnosticsSession.kt": "387a04c77471ca388087b7b16d0982ed861c1d85ce7a010ac9f2c80155b51f4d",
+    "app/src/main/java/it/multipla/obd/MainActivity.kt": "acd0bbf6f94ec773ba2e926bd9a19c4d2675f90631debd94dcb3b738e99bef6a",
+    "app/src/test/java/it/multipla/obd/diagnostics/DiagnosisStartTest.kt": "a3bb7b8ec24a6fc3fba9ce20da9aabf6fb25c570ce3dfdf43fb050b2d115336b",
+    "app/build.gradle.kts": "347bbf9738e0fedd5aa56c7a0aee76f09e46947e843c1aa857676ca9de8f9365"
+  },
+  "files": {
+    "modified": [
+      "CONTRIBUTING.md",
+      "README.md",
+      "app/build.gradle.kts",
+      "app/src/main/java/it/multipla/obd/DiagnosticsSession.kt",
+      "app/src/main/java/it/multipla/obd/MainActivity.kt",
+      "docs/architecture/overview.md"
+    ],
+    "created": [
+      "app/src/test/java/it/multipla/obd/diagnostics/DiagnosisStartTest.kt",
+      "docs/verification/app-D-0001-avvio-risultati.json",
+      "docs/verification/app-D-0001-avvio-verifica.md"
+    ],
+    "deleted": []
+  }
+}

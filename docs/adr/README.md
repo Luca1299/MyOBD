@@ -67,8 +67,13 @@ La stessa sessione che approva una variazione architetturale aggiorna
 
 - [ADR-0001 — Collegamento Android all'adattatore ELM327](0001-collegamento-android-elm327.md)
   — accettato il 9 novembre 2026; documento storico della versione 0.2.0.
+  ADR-0004 precisa la durata dei risultati conclusi senza cambiare l’arresto del servizio.
 - [ADR-0002 — Primo collegamento alla centralina e riabilitazione dell'autoconnessione](0002-primo-collegamento-e-riabilitazione-automatica.md)
   — accettato il 10 novembre 2026; documento storico della versione 0.2.1.
+
+- [ADR-0004 — Conservazione dei risultati nel processo](0004-conservazione-risultati-nel-processo.md)
+  — `architettura`, accettato il 10 novembre 2026: ultimo risultato reale e demo
+  in memoria fino alla terminazione del processo, con servizio arrestato da Scollega.
 
 I primi due documenti precedono queste convenzioni e mantengono testo,
 intestazioni e collegamenti originali. I loro requisiti e rapporti restano

@@ -1,8 +1,8 @@
 # Multipla OBD — Architettura corrente
 
-Stato documentato il 10 novembre 2026 sulla versione applicativa 0.2.1.
+Stato documentato il 10 novembre 2026 sulla versione applicativa 0.3.2.
 OBD significa On-Board Diagnostics. Questa overview descrive il sistema
-presente e distingue le scelte di strumenti ancora da attuare; non aggiunge
+presente e gli strumenti integrati; non aggiunge
 funzionalità alla vettura o all'app.
 
 Le motivazioni sono negli Architecture Decision Record (ADR)
@@ -23,6 +23,34 @@ compilazione restano nel [README](../../README.md), i comandi in
   servizio di sessione, interfaccia Jetpack Compose ed esportazione tramite
   il selettore documenti del sistema.
 
+La diagnosi manuale confermata da [app/D-0001](../design/app/D-0001-diagnosi-obd-sola-lettura/README.md)
+riusa questi proprietari. `DiagnosticsSession` conserva un solo tentativo
+attivo, contesto fissato all’avvio e progressi per richiesta;
+`DiagnosisReport` prepara il testo dai risultati conclusi e `DiagnosisContent`
+li presenta senza avviare operazioni. La demo mantiene lo stesso servizio
+avviato dall’interfaccia visibile, senza Bluetooth o primo piano
+`connectedDevice`, anche quando si apre il selettore documenti; non introduce
+un secondo proprietario né persistenza dopo la terminazione del processo.
+L’interruzione della sequenza attende la richiesta corrente; intento, fase ed
+esito conclusivo sono decisi sullo stesso stato atomico. `Scollega` usa il
+comando di arresto esistente. Le letture aggregate dei codici conservano le
+risposte positive insieme agli eventuali limiti delle altre risposte.
+Il Registro esporta dati e scambi correnti, separati dalla fotografia della
+diagnosi conclusa.
+
+L’ammissione di una lettura pubblica insieme occupazione e nuovo tentativo,
+rivalutando i prerequisiti correnti. Una diagnosi preparata per un collegamento
+perso non viene trasferita al successivo; la perdita subito dopo l’ammissione
+conclude il tentativo anche se la coroutine non è ancora partita. È una
+correzione dell’implementazione di app/D-0001, senza nuove politiche di avvio.
+
+Secondo [ADR-0004](../adr/0004-conservazione-risultati-nel-processo.md),
+il livello Application possiede un contenitore in memoria dei soli ultimi
+risultati conclusi, reale e demo separati. Il servizio resta proprietario
+della sessione attiva e si arresta con Scollega; un servizio ricreato nello
+stesso processo ritrova i dati della propria modalità, senza riavviare la
+diagnosi. La terminazione del processo elimina il contenitore.
+
 Il nucleo resta indipendente da Android e Compose. Il confine è espresso dalle
 dipendenze Gradle e dai contratti: non è presente un controllo ArchUnit e questa
 documentazione non ne introduce uno. Non si importano core, moduli, server,
@@ -36,8 +64,9 @@ database o sistemi di estensione appartenenti a Naedo.
 | obd-core | ConnectionStore / AdapterLink | Contratti per profilo, blocco manuale, collegamento e verifica della centralina. |
 | obd-core | PromptConnection | Lettore passivo del flusso, risposte fino al prompt, fine del flusso, timeout e cancellazione. |
 | obd-core | ElmSession | Inizializzazione adattatore separata dalla ricerca della centralina; richieste diagnostiche serializzate. |
-| obd-core | ObdParser / DemoTransport | Decodifica OBD e simulatore. |
+| obd-core | ObdParser / DiagnosticReader / ReadinessDecoder / DtcCatalog / DemoTransport | Decodifica, lettori diagnostici in sola lettura, descrizioni locali verificate e simulatore. |
 | app | DiagnosticService | Proprietario della sessione, servizio in primo piano, notifica, wake lock e ciclo di vita indipendente dalla schermata. |
+| app | MultiplaApplication / DiagnosisResults | Ultimi risultati conclusi nella memoria del processo, reale e demo separati; nessuna proprietà delle operazioni. |
 | app | DiagnosticsSession | Letture, rapporto, registri, isolamento della demo e stato per l'interfaccia. |
 | app | AndroidConnectionStore | Persistenza del profilo e del blocco manuale. |
 | app | RfcommTransport / ElmAdapterLink | Collegamento Bluetooth Serial Port Profile (SPP) tramite Radio Frequency Communication (RFCOMM) e adattamento al coordinatore. |
@@ -86,16 +115,19 @@ ADR-0003 adotta Cucumber per gli scenari nuovi o modificati e Spotless/ktlint
 per la formattazione. Gli strumenti sono integrati secondo il
 [package progetto/D-0001](../design/progetto/D-0001-verifiche-automatiche/README.md)
 confermato dal proprietario il 10 novembre 2026. Il runner Cucumber nel nucleo
-esegue soltanto il pilota di connessione attraverso il coordinatore reale,
-con trasporto e tempo simulati; gli scenari della futura diagnosi restano
-fuori dall'esecuzione. Le suite JUnit/Robolectric esistenti sono conservate.
+esegue il pilota di connessione attraverso il coordinatore reale e le tre
+feature diagnostiche del protocollo. Nel modulo Android sono eseguibili le
+due feature della sessione e del rapporto. Trasporto e tempo sono simulati;
+le verifiche Compose usano la schermata effettiva con Robolectric. Le suite
+JUnit/Robolectric esistenti sono conservate.
 
 Spotless applica ktlint con configurazione comune adatta a Compose ai sorgenti
 Kotlin dei due moduli e agli script Gradle Kotlin. Il controllo aggregato
 verifica test locali e formattazione senza correggere i sorgenti; l'applicazione
 delle correzioni è esplicita. Versioni e comandi provati restano in
 `CONTRIBUTING.md`, risultati e limiti nel
-[rapporto D-0001](../verification/progetto-D-0001-verifica.md).
+[rapporto degli strumenti](../verification/progetto-D-0001-verifica.md) e nel
+[rapporto diagnostico](../verification/app-D-0001-verifica.md).
 
 ## Evidenze e limiti
 
@@ -104,6 +136,6 @@ versioni indicate. Le evidenze storiche non certificano nuove esecuzioni.
 Prove simulate, comportamento Android reale,
 adattatore e vettura hanno evidenze distinte.
 
-Non vengono risolti in questa sessione i temi diagnostici rinviati nei
-documenti precedenti. Nessun nuovo punto architetturale resta aperto nel
-perimetro del consolidamento del metodo.
+La diagnosi generica confermata è attuata; accesso specifico Fiat/metano e
+attribuzione delle risposte alle centraline restano fuori perimetro.
+Nessuna nuova decisione architetturale è stata introdotta per queste letture.

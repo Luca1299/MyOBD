@@ -1,0 +1,109 @@
+MULTIPLA OBD · Diagnosi #1
+Tipo sessione: SIMULATA — DATI INVENTATI
+Adattatore: OBDII · DEMO · ELM327 DEMO
+Protocollo: ISO 9141-2 · SIMULATO
+Alimentazione annotata manualmente: Benzina
+Inizio: 2026-11-10T15:38:54.817923Z; fine: 2026-11-10T15:38:56.125854Z; durata: 1307 ms
+Esito: Parziale
+Motivo: Una o più sezioni hanno dati mancanti o letture non conclusive
+Orari di acquisizione del telefono. Letture sequenziali, non simultanee.
+Stato spia e readiness dall'ultima cancellazione
+Dati acquisiti; lettura: 2026-11-10T15:38:54.900884Z
+Spia richiesta dalla centralina: accesa; codici confermati dichiarati: 1
+Mancate accensioni: Completato
+Sistema carburante: Completato
+Componenti: Completato
+Catalizzatore: Completato
+Catalizzatore riscaldato: Non supportato
+Sistema evaporativo: Incompleto
+Aria secondaria: Non supportato
+Sensore ossigeno: Completato
+Riscaldatore sensore ossigeno: Completato
+Ricircolo gas di scarico: Non supportato
+Memorizzati: Dati acquisiti
+Dati acquisiti; lettura: 2026-11-10T15:38:54.984137Z
+P0171 — Miscela troppo magra, banco 1
+Fonte: OBDex · CC0-1.0 · https://github.com/foerbsnavi/OBDex; versione: 9ba1ffa095f3140d9e21b985b322ddea3134bb60 · it-1
+In attesa: Risposta valida senza codici o senza frame
+Risposta valida senza codici o senza frame; lettura: 2026-11-10T15:38:55.067187Z
+Permanenti: Lettura non conclusiva
+Lettura non conclusiva; lettura: 2026-11-10T15:38:55.166212Z
+Limite: Nessun dato ricevuto per questa richiesta
+Freeze frame · frame 00
+Dati acquisiti; lettura: 2026-11-10T15:38:55.496123Z
+Codice restituito per il frame: P0171
+Giri motore: 1024.0 giri/min
+Velocità: 20 km/h
+Associazione fra risposte, codice e centralina non verificata con ATH0; valori restituiti separatamente, nessuna fotografia coerente garantita.
+Data e ora del guasto non disponibili; l'ora di lettura non è l'ora del guasto.
+Parametri attuali
+Dati acquisiti; lettura: 2026-11-10T15:38:56.125794Z
+Giri motore: 820.0 giri/min
+Temperatura refrigerante: 88 °C
+Velocità: 0 km/h
+Correzione carburazione breve · banco 1: 1,6 %
+Correzione carburazione lunga · banco 1: 6,3 %
+Pressione assoluta collettore: 34 kPa
+Posizione farfalla: 3,1 %
+Centralina di origine non identificata. Diagnosi OBD generica: non dimostra l'accesso a tutte le centraline o alla gestione metano.
+L'esito descrive l'acquisizione e non certifica la salute della vettura né l'esito della revisione. Le descrizioni indicano condizioni rilevate, senza individuare cause esatte o riparazioni.
+Registro originale disponibile: ultime 400 voci alla conclusione.
+16:38:42.319  SESSIONE SIMULATA · Fiat Multipla 2005 · metano originale
+16:38:42.321  CONNESSIONE AUTOMATICA · tentativo 1/3
+16:38:42.321  STATO Collegamento · tentativo 1/3
+16:38:42.473  TX  ATZ
+16:38:42.554  RX  ELM327 DEMO>
+16:38:42.554  TX  ATI
+16:38:42.642  RX  ELM327 DEMO>
+16:38:42.645  TX  ATE0
+16:38:42.726  RX  OK>
+16:38:42.727  TX  ATL0
+16:38:42.808  RX  OK>
+16:38:42.809  TX  ATS0
+16:38:42.891  RX  OK>
+16:38:42.891  TX  ATH0
+16:38:42.975  RX  OK>
+16:38:42.975  TX  ATSP0
+16:38:43.059  RX  OK>
+16:38:43.059  ADATTATORE COLLEGATO · ELM327 DEMO
+16:38:43.059  CENTRALINA · Verifica in corso sull’adattatore collegato
+16:38:43.060  TX  0100
+16:38:43.060  STATO Adattatore collegato · verifica centralina…
+16:38:43.141  RX  41 00 8E 38 80 00>
+16:38:43.142  TX  ATDP
+16:38:43.224  RX  ISO 9141-2 · SIMULATO>
+16:38:43.224  TX  ATDPN
+16:38:43.306  RX  A3>
+16:38:43.307  CENTRALINA RAGGIUNTA · ISO 9141-2 · SIMULATO
+16:38:43.309  STATO Centralina OBD raggiunta
+16:38:49.527  NOTA Alimentazione indicata manualmente: Benzina
+16:38:54.819  TX  0101
+16:38:54.899  RX  41 01 81 07 65 04>
+16:38:54.901  TX  03
+16:38:54.983  RX  43 01 71 00 00 00 00>
+16:38:54.985  TX  07
+16:38:55.066  RX  47 00 00 00 00 00 00>
+16:38:55.068  TX  0A
+16:38:55.165  RX  NO DATA>
+16:38:55.166  TX  020200
+16:38:55.247  RX  42 02 00 01 71>
+16:38:55.249  TX  020000
+16:38:55.329  RX  42 00 00 00 18 00 00>
+16:38:55.331  TX  020C00
+16:38:55.411  RX  42 0C 00 10 00>
+16:38:55.412  TX  020D00
+16:38:55.493  RX  42 0D 00 14>
+16:38:55.496  TX  010C
+16:38:55.577  RX  41 0C 0C D0>
+16:38:55.579  TX  0105
+16:38:55.660  RX  41 05 80>
+16:38:55.662  TX  010D
+16:38:55.743  RX  41 0D 00>
+16:38:55.744  TX  0106
+16:38:55.824  RX  41 06 82>
+16:38:55.851  TX  0107
+16:38:55.957  RX  41 07 88>
+16:38:55.957  TX  010B
+16:38:56.038  RX  41 0B 22>
+16:38:56.038  TX  0111
+16:38:56.125  RX  41 11 08>

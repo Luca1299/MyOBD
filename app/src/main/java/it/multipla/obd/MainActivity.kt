@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.os.IBinder
 import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -56,6 +57,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -93,7 +95,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge(statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT))
         setContent { App() }
     }
 
@@ -153,6 +155,19 @@ class MainActivity : ComponentActivity() {
         var selected by rememberSaveable { mutableStateOf("") }
         var permission by remember { mutableStateOf(hasConnectPermission()) }
         var notifications by remember { mutableStateOf(Build.VERSION.SDK_INT < 33 || checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) }
+
+        fun exportReport(snapshot: String) {
+            val stamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"))
+            val name = "multipla-${if (state.demo) "DEMO-" else ""}$stamp.txt"
+            lifecycleScope.launch {
+                try {
+                    withContext(Dispatchers.IO) { pendingExport.writeText(snapshot, Charsets.UTF_8) }
+                    save.launch(name)
+                } catch (e: Exception) {
+                    model.message("Esportazione non riuscita: ${e.message}")
+                }
+            }
+        }
 
         fun refresh() {
             permission = hasConnectPermission()
@@ -216,7 +231,7 @@ class MainActivity : ComponentActivity() {
                     }
                     if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
                     ScrollableTabRow(selectedTabIndex = tab, edgePadding = 8.dp) {
-                        listOf("Collegamento", "Parametri", "Errori", "Registro").forEachIndexed { index, label ->
+                        listOf("Collegamento", "Parametri", stringResource(R.string.diagnosis_tab), "Registro").forEachIndexed { index, label ->
                             Tab(selected = tab == index, onClick = { tab = index }, text = { Text(label) })
                         }
                     }
@@ -286,12 +301,12 @@ class MainActivity : ComponentActivity() {
                                 state.connection.detail?.let { Text(it, color = Color(0xFFE9BE73)) }
                                 if (state.connection.phase == ConnectionPhase.MANUAL_REQUIRED) Text("L’autoconnessione è sospesa. Premi Connetti manualmente: un collegamento riuscito la riabilita anche per le prossime aperture.")
                                 if (!state.demo) {
-                                    OutlinedButton(onClick = { model.demo() }, enabled = !state.busy && !state.connected) { Text("Prova con dati simulati") }
+                                    OutlinedButton(onClick = { service.requestDemoFromUi() }, enabled = !state.busy && !state.connected) { Text("Prova con dati simulati") }
                                 } else {
                                     OutlinedButton(onClick = { service.requestExitDemoFromUi() }, enabled = !state.busy) { Text("Torna al dispositivo reale") }
                                 }
                                 if (state.busy || state.connected) OutlinedButton(onClick = { model.disconnect() }) { Text("Scollega / annulla") }
-                                Text("Versione 0.2.1 · ADR-0001 / ADR-0002 · letture diagnostiche", style = MaterialTheme.typography.bodySmall)
+                                Text("Versione 0.3.2 · ADR-0001 / ADR-0002 · letture diagnostiche", style = MaterialTheme.typography.bodySmall)
                             }
 
                             1 -> {
@@ -325,41 +340,12 @@ class MainActivity : ComponentActivity() {
                                 Text("Le letture sono sequenziali. Esporta il rapporto per conservare il campione prima di leggerne un altro.", style = MaterialTheme.typography.bodySmall)
                             }
 
-                            2 -> {
-                                Text("Diagnostica OBD motore", style = MaterialTheme.typography.titleLarge)
-                                Text("Legge i codici restituiti attraverso l’OBD standard. I sistemi Fiat/metano dedicati richiederanno una verifica specifica.")
-                                Button(onClick = { model.readErrors() }, enabled = state.info != null && !state.busy) { Text("Leggi errori") }
-                                state.dtcTime?.let { Text("Scansione completata alle $it", style = MaterialTheme.typography.bodySmall) }
-                                state.dtcs.forEach { result ->
-                                    InfoCard {
-                                        Text(result.kind.label, style = MaterialTheme.typography.titleMedium)
-                                        when {
-                                            result.problem != null -> Text("Lettura non conclusiva: ${result.problem}", color = Color(0xFFE9BE73))
-                                            result.codes.isEmpty() -> Text("Nessun codice restituito per questa categoria")
-                                            else -> result.codes.forEach { Text(it, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.headlineSmall) }
-                                        }
-                                    }
-                                }
-                                if (state.dtcs.isEmpty()) Text("Scansione non ancora eseguita.")
-                                Text("La cancellazione errori verrà aggiunta dopo la verifica delle letture sull’auto.", style = MaterialTheme.typography.bodySmall)
-                            }
+                            2 -> DiagnosisContent(state, model::startDiagnosis, model::interruptDiagnosis, model::fuel) { model.exportDiagnosis()?.let(::exportReport) }
 
                             else -> {
                                 Text("Registro della sessione", style = MaterialTheme.typography.titleLarge)
                                 Text("Ultime 400 voci. Include richieste, risposte e problemi di comunicazione.")
-                                OutlinedButton(onClick = {
-                                    val snapshot = model.exportText()
-                                    val stamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"))
-                                    val name = "multipla-${if (state.demo) "DEMO-" else ""}$stamp.txt"
-                                    lifecycleScope.launch {
-                                        try {
-                                            withContext(Dispatchers.IO) { pendingExport.writeText(snapshot, Charsets.UTF_8) }
-                                            save.launch(name)
-                                        } catch (e: Exception) {
-                                            model.message("Esportazione non riuscita: ${e.message}")
-                                        }
-                                    }
-                                }, enabled = !state.busy && state.logs.isNotEmpty()) { Text("Esporta rapporto .txt") }
+                                OutlinedButton(onClick = { exportReport(model.exportText()) }, enabled = !state.busy && state.logs.isNotEmpty()) { Text(stringResource(R.string.report_export)) }
                                 state.logs.takeLast(120).forEach { Text(it, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall) }
                                 if (state.logs.isEmpty()) Text("Avvia una sessione per registrare gli scambi.")
                             }
@@ -373,7 +359,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun InfoCard(content: @Composable () -> Unit) {
+internal fun InfoCard(content: @Composable () -> Unit) {
     Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { content() }
     }

@@ -159,16 +159,24 @@ Spotless 8.3.0 e ktlint 1.8.0. Le dipendenze applicative restano quelle del READ
 
 `AutomaticRetryTest` usa il runner JUnit 4 nei test ordinari di `obd-core`.
 Seleziona esplicitamente solo `features/connection/automatic-retry.feature`
-dal classpath: le feature diagnostiche in design dei due moduli non sono
-eseguite. Gli step usano il coordinatore reale, un trasporto simulato e tempo
-virtuale. Step indefiniti, pendenti, ambigui o falliti fanno fallire il test;
+dal classpath. `DiagnosticsTest` nel nucleo e `DiagnosisTest` nell’app
+eseguono inoltre le cinque feature diagnostiche confermate di `app/D-0001`,
+con trasporto e tempo controllati e report Cucumber separati. Gli step di
+connessione e sessione attraversano il coordinatore reale; quelli di protocollo
+attraversano i lettori e il parser applicativi. Step indefiniti, pendenti, ambigui o falliti fanno fallire il test;
 `RequiredScenariosRunner` rifiuta una scoperta vuota prima che Gradle possa
 scartare la suite; `ScenarioExecutionGuard` verifica gli scenari avviati e conclusi.
 
 I risultati Cucumber sono nel riepilogo della console, nel report JUnit
 `obd-core/build/reports/tests/test/index.html` e nei report
 `obd-core/build/reports/cucumber/automatic-retry.json` e `.html`. Le suite
-JUnit esistenti sono mantenute. Il runner Cucumber per JUnit 4 è deprecato
+JUnit esistenti sono mantenute. I report diagnostici sono
+`obd-core/build/reports/cucumber/diagnostics.json` e `.html` e
+`app/build/reports/cucumber/diagnosis.json` e `.html`. I runner di entrambi
+i moduli rifiutano la scoperta vuota; gli step diagnostici restano locali al
+rispettivo modulo. Le verifiche Compose usano `ui-test-junit4` 1.9.0,
+risolto dalla distinta base (Bill of Materials, BOM) già adottata, con Robolectric.
+Il runner Cucumber per JUnit 4 è deprecato
 a monte: questa integrazione conserva il percorso richiesto da ADR-0003,
 senza introdurre una migrazione a JUnit 5.
 
@@ -181,7 +189,12 @@ Non sono disattivate globalmente regole dei nomi, né installati hook Git.
 La correzione degli import con `*`, non automatizzabile da ktlint, è esplicita.
 
 Comandi, prove negative, separazione della formattazione ed esiti sono nel
-[rapporto corrente](docs/verification/progetto-D-0001-verifica.md).
+[rapporto degli strumenti](docs/verification/progetto-D-0001-verifica.md).
+L’estensione diagnostica e le sue evidenze correnti sono nel
+[rapporto app/D-0001](docs/verification/app-D-0001-verifica.md); le correzioni
+della revisione sono nel [rapporto 0.3.1](docs/verification/app-D-0001-correzioni-verifica.md).
+La correzione concorrente dell’avvio è nel
+[rapporto 0.3.2](docs/verification/app-D-0001-avvio-verifica.md).
 
 ## Consegna
 

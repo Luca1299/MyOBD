@@ -1,15 +1,16 @@
 # D-0001 — Diagnosi OBD motore in sola lettura
 
-**Stato:** in design **Area:** app **Data:** 2026-11-10
+**Stato:** confermato **Area:** app **Data:** 2026-11-10
 
 OBD significa On-Board Diagnostics; DTC significa Diagnostic Trouble Code,
 codice diagnostico di guasto. Architecture Decision Record (ADR) indica il
 registro delle motivazioni; Behavior-Driven Development (BDD) indica gli
-scenari eseguibili di comportamento.
+scenari eseguibili di comportamento. TXT indica il formato di testo semplice.
 
 **ADR correlati:** [ADR-0001](../../../adr/0001-collegamento-android-elm327.md),
 [ADR-0002](../../../adr/0002-primo-collegamento-e-riabilitazione-automatica.md),
-[ADR-0003](../../../adr/0003-metodo-di-sviluppo-e-verifiche.md).
+[ADR-0003](../../../adr/0003-metodo-di-sviluppo-e-verifiche.md),
+[ADR-0004](../../../adr/0004-conservazione-risultati-nel-processo.md).
 
 **Scenari di design:**
 
@@ -20,9 +21,10 @@ scenari eseguibili di comportamento.
 - [Rapporto esportato](../../../../app/src/test/resources/features/diagnostics/diagnosis-report.feature).
 
 Il proprietario ha autorizzato il consolidamento di questa specifica e degli
-scenari con `approvo` il 10 novembre 2026. Il package resta `in design`:
-la conferma separata per il coding non è stata ricevuta. Le feature sono
-artefatti di design, non test già eseguibili o superati.
+scenari con `approvo` il 10 novembre 2026. Conferma separata per il coding
+ricevuta dal proprietario il 10 novembre 2026, con incarico di registrarla e
+implementare l'intero perimetro qui descritto. Gli esiti delle verifiche
+sono registrati separatamente dalla specifica.
 
 ## Scopo e perimetro
 
@@ -58,9 +60,10 @@ I numeri delle domande già discusse restano stabili.
 | 2 | Risolto | La diagnosi parte soltanto dal pulsante «Avvia diagnosi», mai automaticamente al collegamento. |
 | 3 | Risolto | Risultato in sessione ed esportazione; lo storico salvato nell'app è un incremento successivo. |
 | 4 | Risolto | Codice, descrizione verificata e limiti d'interpretazione; approfondimenti su cause e controlli restano successivi. |
+| 5 | Risolto su APPROVO il 10 novembre 2026, con incarico di implementazione | Ultimo risultato concluso reale e demo separati nella memoria del processo, anche dopo Scollega e ricreazione del servizio; nessuno storico su disco. |
 
-Nessun punto DA CHIEDERE aperto sul perimetro consolidato. La conferma per il
-coding e le prove hardware restano passaggi distinti, non risposte da inventare.
+Nessun punto DA CHIEDERE aperto sul perimetro confermato. Le prove hardware
+restano distinte dalla conferma per il coding.
 
 ## Contenuto della diagnosi
 
@@ -236,13 +239,18 @@ di una richiesta pendente, che nel trasporto attuale comporta la chiusura.
 
 ## Conservazione ed esportazione
 
-Il risultato termina in memoria e resta consultabile dopo la disconnessione
-finché la sessione applicativa è disponibile. Non si introduce recupero dopo
-terminazione del processo, archivio su disco o storico navigabile. Per
+Il risultato concluso resta nella memoria del processo anche dopo Scollega,
+cambio app, ricreazione dell’interfaccia e distruzione del servizio. Il
+collegamento, il servizio e la notifica vengono comunque arrestati. Si conserva
+solo l’ultimo risultato concluso reale e quello demo, separati; una nuova
+acquisizione mostra sezioni vuote e, alla conclusione, sostituisce il risultato
+della stessa modalità. Il ripristino dei dati non avvia nuove acquisizioni.
+La terminazione del processo elimina entrambi i risultati. Non si introduce
+recupero successivo, archivio su disco o storico navigabile. Per
 conservare una diagnosi oltre la sessione occorre esportare il rapporto.
 
-Una nuova diagnosi produce risultati distinti e può sostituire il tentativo
-precedente nella sessione; la schermata ricorda che l'esportazione lo conserva.
+Una nuova diagnosi produce risultati distinti e sostituisce il tentativo
+precedente della stessa modalità; la schermata ricorda che l'esportazione lo conserva.
 Questa capacità non introduce un confronto fra acquisizioni.
 
 Il rapporto TXT è una copia dei risultati raccolti, ottenuta senza nuove
@@ -321,10 +329,10 @@ schermate effettive. Servono confronto testo/interfaccia e casi di errore,
 non soltanto compilazione o parsing delle feature.
 
 L'integrazione degli strumenti è specificata in
-[progetto/D-0001](../../progetto/D-0001-verifiche-automatiche/README.md), ancora
-`in design`. Il presente consolidamento non la implementa né la conferma.
-Prima di dichiarare eseguibili i nuovi scenari vanno resi operativi runner e
-step nei moduli pertinenti; la sola presenza dei file non soddisfa i criteri.
+[progetto/D-0001](../../progetto/D-0001-verifiche-automatiche/README.md),
+confermato e attuato il 10 novembre 2026. La relativa consegna va verificata
+prima di integrare runner e step diagnostici nei moduli pertinenti;
+la sola presenza delle feature non soddisfa i criteri.
 
 ## Riferimenti tecnici
 

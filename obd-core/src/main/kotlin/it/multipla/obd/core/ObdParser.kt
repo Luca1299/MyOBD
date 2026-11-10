@@ -98,35 +98,99 @@ object ObdParser {
 
     fun supported(raw: String, base: Int): Set<Int> {
         val bytes = pid(raw, base, 4)
+        return supportedBytes(bytes, base)
+    }
+
+    /** Una pagina di 32 identificatori, con la stessa codifica nei contesti attuale e memorizzato. */
+    fun supportedBytes(bytes: List<Int>, base: Int): Set<Int> {
+        require(bytes.size >= 4)
         return (0 until 32).filter { bit -> bytes[bit / 8] and (1 shl (7 - bit % 8)) != 0 }
             .map { base + it + 1 }.toSet()
     }
 
-    fun dtcs(raw: String, service: Int, isCan: Boolean): List<String> {
-        val records = positive(raw, "%02X".format(service), service)
-        return records.flatMap { payload ->
-            val bytes: List<Int>
-            if (isCan) {
-                if (payload.isEmpty()) throw ElmResponseException("Conteggio errori CAN assente")
-                val count = payload.first()
-                if (payload.size < 1 + count * 2 || payload.drop(1 + count * 2).any { it != 0 }) {
-                    throw ElmResponseException("Conteggio errori CAN incoerente")
-                }
-                bytes = payload.drop(1).take(count * 2)
-                if (bytes.chunked(2).any { it == listOf(0, 0) }) {
-                    throw ElmResponseException("Codice DTC nullo nel conteggio CAN")
-                }
-            } else {
-                if (payload.isEmpty() || payload.size % 2 != 0) {
-                    throw ElmResponseException("Elenco errori incompleto")
-                }
-                bytes = payload
-            }
-            bytes.chunked(2).filter { it != listOf(0, 0) }.map { pair ->
-                val a = pair[0]
-                val b = pair[1]
-                "${"PCBU"[a shr 6]}${(a shr 4) and 3}${(a and 15).toString(16).uppercase()}%02X".format(b)
-            }
-        }.distinct()
+    /** Rifiuta risposte multiple: ATH0 non permette di unire valori di origine incerta. */
+    fun freezePid(raw: String, pid: Int, dataBytes: Int): List<Int> {
+        val records = positive(raw, "02%02X00".format(pid), 0x02)
+        if (records.size != 1) throw ElmResponseException("Origine delle risposte freeze frame ambigua")
+        val payload = records.single()
+        if (payload.size < dataBytes + 2 || payload[0] != pid || payload[1] != 0) {
+            throw ElmResponseException("Risposta freeze frame assente, incompleta o riferita a un altro frame")
+        }
+        return payload.drop(2)
     }
+
+    /** La coppia nulla indica assenza dichiarata, non un codice di guasto. */
+    fun troubleCode(first: Int, second: Int): String? = if (first == 0 && second == 0) {
+        null
+    } else {
+        "${"PCBU"[first shr 6]}${(first shr 4) and 3}${(first and 15).toString(16).uppercase()}%02X".format(second)
+    }
+
+    /** Lettura aggregata: una risposta negativa non cancella quelle positive valide. */
+    fun dtcReading(raw: String, service: Int, isCan: Boolean): DtcReading {
+        val records = frames(raw, "%02X".format(service))
+        val codes = mutableListOf<String>()
+        val problems = mutableListOf<String>()
+        val refusals = mutableListOf<ObdNegativeResponse>()
+        var validResponses = 0
+        for (record in records) {
+            try {
+                when (record.firstOrNull()) {
+                    NEGATIVE_RESPONSE -> {
+                        if (record.size != NEGATIVE_RESPONSE_BYTES || record[1] != service) {
+                            throw ElmResponseException("Risposta negativa incompleta o riferita a un altro servizio")
+                        }
+                        val refusal = ObdNegativeResponse(record[1], record[2])
+                        refusals += refusal
+                        problems += refusal.message.orEmpty()
+                    }
+
+                    service + POSITIVE_RESPONSE_OFFSET -> {
+                        codes += decodeDtcPayload(record.drop(1), isCan)
+                        validResponses++
+                    }
+
+                    else -> throw ElmResponseException("Servizio OBD inatteso")
+                }
+            } catch (error: ElmResponseException) {
+                problems += error.message.orEmpty()
+            }
+        }
+        if (validResponses == 0) {
+            val onlyRefusals = refusals.size == records.size
+            val sameReason = refusals.map { it.reason }.distinct().size == 1
+            if (onlyRefusals && sameReason) throw refusals.first()
+            throw ElmResponseException(problems.joinToString("; "))
+        }
+        return DtcReading(codes.distinct(), problems.toList())
+    }
+
+    /** Il contratto storico della sola lista rifiuta un aggregato parziale. */
+    fun dtcs(raw: String, service: Int, isCan: Boolean): List<String> = positive(raw, "%02X".format(service), service).flatMap { decodeDtcPayload(it, isCan) }.distinct()
+
+    private fun decodeDtcPayload(payload: List<Int>, isCan: Boolean): List<String> {
+        val bytes: List<Int>
+        if (isCan) {
+            if (payload.isEmpty()) throw ElmResponseException("Conteggio errori CAN assente")
+            val count = payload.first()
+            val expectedSize = CAN_COUNT_BYTES + count * DTC_BYTES
+            if (payload.size < expectedSize || payload.drop(expectedSize).any { it != 0 }) {
+                throw ElmResponseException("Conteggio errori CAN incoerente")
+            }
+            bytes = payload.drop(CAN_COUNT_BYTES).take(count * DTC_BYTES)
+            if (bytes.chunked(DTC_BYTES).any { it == listOf(0, 0) }) {
+                throw ElmResponseException("Codice DTC nullo nel conteggio CAN")
+            }
+        } else {
+            if (payload.isEmpty() || payload.size % DTC_BYTES != 0) throw ElmResponseException("Elenco errori incompleto")
+            bytes = payload
+        }
+        return bytes.chunked(DTC_BYTES).mapNotNull { troubleCode(it[0], it[1]) }
+    }
+
+    private const val NEGATIVE_RESPONSE = 0x7F
+    private const val NEGATIVE_RESPONSE_BYTES = 3
+    private const val POSITIVE_RESPONSE_OFFSET = 0x40
+    private const val CAN_COUNT_BYTES = 1
+    private const val DTC_BYTES = 2
 }
