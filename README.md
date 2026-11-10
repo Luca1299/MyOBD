@@ -27,7 +27,10 @@ della versione 0.2.0.
 Il metodo è adottato con [ADR-0003](docs/adr/0003-metodo-di-sviluppo-e-verifiche.md).
 L'integrazione di Cucumber e della formattazione automatica è specificata in
 [progetto/D-0001](docs/design/progetto/D-0001-verifiche-automatiche/README.md),
-ancora `in design`: il consolidamento documentale non li rende già operativi.
+confermato per il coding il 10 novembre 2026. Strumenti e scenario pilota sono
+integrati; comandi ed evidenze correnti sono in
+[CONTRIBUTING.md](CONTRIBUTING.md#controlli-attualmente-disponibili) e nel
+[rapporto D-0001](docs/verification/progetto-D-0001-verifica.md).
 
 ## Collegamento e riconnessione
 

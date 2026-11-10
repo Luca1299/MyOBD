@@ -1,16 +1,19 @@
 # D-0001 — Verifiche automatiche e formattazione
 
-**Stato:** in design **Area:** progetto **Data:** 2026-11-10
+**Stato:** confermato **Area:** progetto **Data:** 2026-11-10
 
 **ADR correlati:** [ADR-0003](../../../adr/0003-metodo-di-sviluppo-e-verifiche.md),
 [ADR-0001](../../../adr/0001-collegamento-android-elm327.md) per il solo
 comportamento già approvato dello scenario pilota.
 
 **Scenari:** [automatic-retry.feature](../../../../obd-core/src/test/resources/features/connection/automatic-retry.feature).
-Artefatto di design, ancora privo di runner e step.
+Scoperta ed esecuzione sono documentate nel
+[rapporto di verifica](../../../verification/progetto-D-0001-verifica.md).
 
 Consolidamento documentale autorizzato con `approvo` il 10 novembre 2026.
-La conferma separata per il coding non è ancora stata ricevuta.
+Conferma separata per il coding ricevuta dal proprietario il 10 novembre 2026,
+con incarico di registrarla e implementare l'intero perimetro qui descritto.
+Gli scenari della futura diagnosi restano esclusi dall'implementazione.
 Architecture Decision Record (ADR) indica il registro delle motivazioni;
 Behavior-Driven Development (BDD) indica gli scenari di comportamento.
 
@@ -100,11 +103,10 @@ un fallimento, poi riportarlo al verde. Integrare il controllo di stile,
 verificarne il fallimento e applicare la formattazione in un passaggio
 distinto. Eseguire i controlli pertinenti e aggiornare evidenze e comandi.
 
-La fase attuale si arresta prima di questa sequenza: la specifica resta
-`in design`. Il passaggio a `confermato` è del proprietario e non deriva
-dall'approvazione documentale già ricevuta.
+La conferma del proprietario autorizza questa sequenza. Esiti e limiti
+dell'implementazione sono registrati in `docs/verification/`; il package
+resta la specifica del comportamento atteso.
 
 ## Punti da chiedere
 
-Nessun punto aperto sul perimetro consolidato. La conferma per il coding è
-un passaggio autorizzativo separato, non una domanda tecnica irrisolta.
+Nessun punto aperto sul perimetro confermato.

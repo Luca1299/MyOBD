@@ -101,8 +101,8 @@ un fallimento del comportamento da problemi di compilazione o ambiente.
 Portare al verde i controlli pertinenti prima della consegna. La sola
 documentazione si verifica senza eseguire inutilmente build applicative.
 
-La scelta di Cucumber e di Spotless con ktlint è adottata; la loro integrazione
-è ancora da implementare. Consultare lo stato effettivo in `CONTRIBUTING.md`:
+La scelta di Cucumber e di Spotless con ktlint è adottata.
+Consultare lo stato effettivo in `CONTRIBUTING.md`:
 non dichiarare attivo o superato un controllo che non è stato configurato ed
 eseguito. L'adozione documentale non certifica la conformità del codice storico.
 

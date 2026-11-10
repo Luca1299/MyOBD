@@ -92,9 +92,9 @@ e quando cambia lo stato o il perimetro autorevole.
 ### Progetto
 
 - [progetto/D-0001 — Verifiche automatiche e formattazione](progetto/D-0001-verifiche-automatiche/README.md)
-  — `in design`, consolidato su `APPROVO` il 10 novembre 2026; integrazione di
-  Cucumber con scenario pilota e controllo Spotless/ktlint. Conferma per il
-  coding ancora da ricevere; nessun runner, step o formatter configurato.
+  — `confermato` dal proprietario per il coding il 10 novembre 2026, con incarico
+  di implementazione: integrazione di Cucumber con scenario pilota e controllo
+  Spotless/ktlint. Gli scenari della futura diagnosi restano fuori perimetro.
 
 ### App
 

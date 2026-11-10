@@ -118,7 +118,7 @@ I comandi si eseguono dalla root con il wrapper; su Windows usare
 `gradlew.bat`.
 
 ```sh
-./gradlew :obd-core:test :app:testDebugUnitTest :app:assembleDebug :app:lintDebug
+./gradlew :check
 ```
 
 I test del nucleo usano Java Virtual Machine (JVM), JUnit 4 e tempo simulato;
@@ -126,19 +126,62 @@ quelli Android includono Robolectric. Questi controlli non richiedono un
 telefono per le suite locali e non ne certificano il comportamento reale.
 La prima risoluzione delle dipendenze può richiedere la rete.
 
-## Controlli adottati, ancora da integrare
+`:check` è il task aggregato della root: dipende da `spotlessCheck`,
+`:obd-core:test` e `:app:testDebugUnitTest`. Il prefisso `:` seleziona il task
+di root, senza richiamare anche i task `check` dei singoli moduli. Il fallimento
+di un controllo fa fallire l'invocazione e non corregge i sorgenti.
 
-Alla data del 10 novembre 2026, Cucumber e Spotless con ktlint sono scelte
-accettate in ADR-0003, ma non sono configurati nella build. Lo scenario pilota
-Gherkin è un artefatto di design, senza runner o step eseguibili. Il perimetro
-dell'integrazione è [progetto/D-0001](docs/design/progetto/D-0001-verifiche-automatiche/README.md),
-ancora `in design` e in attesa della conferma separata del proprietario.
+Verifica completa, inclusa compilazione e analisi statica Android:
 
-Dopo l'integrazione, il controllo di formattazione dovrà far parte delle
-verifiche ordinarie. `spotlessCheck` verificherà Kotlin e script Gradle;
-`spotlessApply` sarà la correzione esplicita. I controlli non dovranno
-correggere automaticamente i sorgenti. Nessun hook Git è previsto.
-L'implementazione aggiornerà questa sezione con i comandi realmente provati.
+```sh
+./gradlew :check :app:assembleDebug :app:lintDebug
+```
+
+Per eseguire soltanto i test locali esistono ancora `:obd-core:test` e
+`:app:testDebugUnitTest`. La sola formattazione si verifica con:
+
+```sh
+./gradlew :spotlessCheck
+```
+
+La correzione è un'azione distinta ed esplicita:
+
+```sh
+./gradlew :spotlessApply
+```
+
+## Scenari e formattazione integrati
+
+Il 10 novembre 2026 è stato confermato e attuato
+[progetto/D-0001](docs/design/progetto/D-0001-verifiche-automatiche/README.md).
+Versioni fissate e provate su Java 17 e Gradle 8.13: Cucumber Java/JUnit 7.29.0,
+Spotless 8.3.0 e ktlint 1.8.0. Le dipendenze applicative restano quelle del README.
+
+`AutomaticRetryTest` usa il runner JUnit 4 nei test ordinari di `obd-core`.
+Seleziona esplicitamente solo `features/connection/automatic-retry.feature`
+dal classpath: le feature diagnostiche in design dei due moduli non sono
+eseguite. Gli step usano il coordinatore reale, un trasporto simulato e tempo
+virtuale. Step indefiniti, pendenti, ambigui o falliti fanno fallire il test;
+`RequiredScenariosRunner` rifiuta una scoperta vuota prima che Gradle possa
+scartare la suite; `ScenarioExecutionGuard` verifica gli scenari avviati e conclusi.
+
+I risultati Cucumber sono nel riepilogo della console, nel report JUnit
+`obd-core/build/reports/tests/test/index.html` e nei report
+`obd-core/build/reports/cucumber/automatic-retry.json` e `.html`. Le suite
+JUnit esistenti sono mantenute. Il runner Cucumber per JUnit 4 è deprecato
+a monte: questa integrazione conserva il percorso richiesto da ADR-0003,
+senza introdurre una migrazione a JUnit 5.
+
+Spotless controlla `app/src/**/*.kt` e `obd-core/src/**/*.kt`, incluse le
+directory `java` di produzione e test, più gli script `*.gradle.kts` della
+root e dei due moduli. Build, file generati e cache restano esclusi. La
+configurazione comune è `.editorconfig`, stile `intellij_idea`; il naming
+delle sole funzioni annotate `Composable` segue la convenzione Compose.
+Non sono disattivate globalmente regole dei nomi, né installati hook Git.
+La correzione degli import con `*`, non automatizzabile da ktlint, è esplicita.
+
+Comandi, prove negative, separazione della formattazione ed esiti sono nel
+[rapporto corrente](docs/verification/progetto-D-0001-verifica.md).
 
 ## Consegna
 

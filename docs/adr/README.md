@@ -81,4 +81,5 @@ Le evoluzioni future seguono il metodo di ADR-0003.
 - [ADR-0003 — Metodo di sviluppo e verifiche](0003-metodo-di-sviluppo-e-verifiche.md)
   — `metodo`, accettato il 10 novembre 2026: adozione delle regole, doppio
   passaggio approvazione/conferma, ciclo degli ADR, Cucumber e formattazione;
-  l'integrazione degli strumenti resta da implementare.
+  lo stato effettivo degli strumenti è in
+  [CONTRIBUTING.md](../../CONTRIBUTING.md#controlli-attualmente-disponibili).

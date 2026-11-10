@@ -1,0 +1,733 @@
+{
+  "date": "2026-11-10",
+  "package": "progetto/D-0001",
+  "versions": {
+    "java": "17.0.19",
+    "gradle": "8.13",
+    "android_gradle_plugin": "8.13.2",
+    "kotlin": "2.2.20",
+    "cucumber": "7.29.0",
+    "spotless": "8.3.0",
+    "ktlint": "1.8.0"
+  },
+  "baseline": {
+    "obd-core": [
+      {
+        "suite": "it.multipla.obd.core.AdapterInitializationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "adapter remains usable when ECU initially reports NO DATA"
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.core.ConnectionControllerTest",
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "AC11 failed manual action has one attempt and preserves lock",
+          "changing target cannot replace an active connection",
+          "command acknowledgement observes policy state even when repeated state is equal",
+          "AC06 repeated UI openings never overlap an in flight attempt",
+          "AC05 physical loss starts one new cycle with three total attempts",
+          "AC10 missing permission or disabled Bluetooth waits without attempts",
+          "AC08 stop closes live link and ignores its subsequent loss signal",
+          "AC06 opening during retry wait does not reset the budget",
+          "AC12 unavailable ECU keeps adapter and consumes no Bluetooth retries",
+          "AC04 third attempt success does not enter manual lock",
+          "AC09 selected identifier is preserved instead of an identically named device",
+          "AC08 stop cancels scheduled retries and reopening current UI does not resume them",
+          "AC01 opens saved target automatically and reaches vehicle",
+          "AC04 second attempt success cancels remaining retries",
+          "AC02 AC03 exactly three attempts with delays from each failure",
+          "AC10 missing profile does not consume attempts",
+          "AC08 stop cancels blocking connect and prevents a late reconnect",
+          "AC11 manual lock survives reopening and only explicit success clears it",
+          "profile saved while idle becomes target of automatic connection"
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.core.ConnectionRecoveryTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "T05 one failed manual attempt cannot create an automatic lock",
+          "T09 malformed ECU reply is a read failure and keeps the adapter connected",
+          "T07 loss after manual recovery gets three fresh attempts and can recover again",
+          "T08 manual adapter success rearms automation even without ECU data",
+          "T06 manual success rearms the next opening without a parallel connection"
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.core.ElmSessionTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "demo exercises discovery measurements and three error categories",
+          "adapter identity without OBD response never establishes a vehicle session",
+          "concurrent callers serialize their adapter commands"
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.core.FirstConnectionTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "T02 search progress can precede data inline or across lines",
+          "T03 one manual connection reaches ECU using the recorded first reply",
+          "T02 search context ends with the command response",
+          "T02 progress handling never repairs corrupt or truncated data",
+          "T01 recorded first response preserves every data byte",
+          "T02 search progress followed by NO DATA remains inconclusive"
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.core.ObdParserTest",
+        "tests": 23,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "unaccounted CAN data is rejected",
+          "echo searching and compact PID response are accepted",
+          "NO DATA is inconclusive rather than an empty error list",
+          "ECU refusal is distinct from no errors",
+          "truncated CAN DTC count is rejected",
+          "Android 17 end of stream terminates rather than spinning",
+          "another PID does not count as a valid measurement",
+          "indexed CAN length mismatch is rejected",
+          "missing K line DTC byte is rejected",
+          "empty prompt is not a successful scan",
+          "multiple positive ECU responses retain all codes",
+          "null DTC cannot satisfy a positive CAN count",
+          "partial parameter response is rejected",
+          "missing CAN fragment is rejected",
+          "supported PID bits use network order and base offset",
+          "pending and permanent use the proper positive services",
+          "CAN count byte is not decoded as a DTC",
+          "indexed ELM CAN response is reassembled with its declared length",
+          "K line DTCs decode all four categories and ignore padding",
+          "valid K line zero response means no returned codes",
+          "reader stops exactly at prompt preserving the next response",
+          "adapter bus error is surfaced",
+          "response without prompt has a bounded buffer"
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.core.PromptConnectionTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "timeout closes wire instead of accepting a stale response on next request",
+          "cancellation closes blocking wire and releases pending command",
+          "fragmented response is completed at prompt and command ends with CR",
+          "idle remote EOF is observed without polling the ECU"
+        ]
+      }
+    ],
+    "app": [
+      {
+        "suite": "it.multipla.obd.ConnectionDiagnosticsTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "T09 failed manual attempt with no lock reports automation still enabled",
+          "T09 invalid response is never labelled ECU unreachable",
+          "T09 NO DATA remains distinct from a malformed response",
+          "T09 export records attempts suspension and manual rearming"
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.SessionServiceTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "T05 failed unblocked manual connection stops foreground work without disabling automation",
+          "AC06 AC07 activity unbind and rebind preserve service session and notification",
+          "AC08 notification stop closes session and releases wake lock",
+          "demo session cannot clear real manual connection gate",
+          "AC11 target and manual lock persist across Android store instances",
+          "T06 manual success persists rearming across Android store and session recreation"
+        ]
+      }
+    ]
+  },
+  "final": {
+    "obd-core": [
+      {
+        "suite": "Automatic connection retry budget",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "Automatic connection stops after three failed attempts"
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.core.AdapterInitializationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "adapter remains usable when ECU initially reports NO DATA"
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.core.ConnectionControllerTest",
+        "tests": 19,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "AC11 failed manual action has one attempt and preserves lock",
+          "changing target cannot replace an active connection",
+          "command acknowledgement observes policy state even when repeated state is equal",
+          "AC06 repeated UI openings never overlap an in flight attempt",
+          "AC05 physical loss starts one new cycle with three total attempts",
+          "AC10 missing permission or disabled Bluetooth waits without attempts",
+          "AC08 stop closes live link and ignores its subsequent loss signal",
+          "AC06 opening during retry wait does not reset the budget",
+          "AC12 unavailable ECU keeps adapter and consumes no Bluetooth retries",
+          "AC04 third attempt success does not enter manual lock",
+          "AC09 selected identifier is preserved instead of an identically named device",
+          "AC08 stop cancels scheduled retries and reopening current UI does not resume them",
+          "AC01 opens saved target automatically and reaches vehicle",
+          "AC04 second attempt success cancels remaining retries",
+          "AC02 AC03 exactly three attempts with delays from each failure",
+          "AC10 missing profile does not consume attempts",
+          "AC08 stop cancels blocking connect and prevents a late reconnect",
+          "AC11 manual lock survives reopening and only explicit success clears it",
+          "profile saved while idle becomes target of automatic connection"
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.core.ConnectionRecoveryTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "T05 one failed manual attempt cannot create an automatic lock",
+          "T09 malformed ECU reply is a read failure and keeps the adapter connected",
+          "T07 loss after manual recovery gets three fresh attempts and can recover again",
+          "T08 manual adapter success rearms automation even without ECU data",
+          "T06 manual success rearms the next opening without a parallel connection"
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.core.ElmSessionTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "demo exercises discovery measurements and three error categories",
+          "adapter identity without OBD response never establishes a vehicle session",
+          "concurrent callers serialize their adapter commands"
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.core.FirstConnectionTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "T02 search progress can precede data inline or across lines",
+          "T03 one manual connection reaches ECU using the recorded first reply",
+          "T02 search context ends with the command response",
+          "T02 progress handling never repairs corrupt or truncated data",
+          "T01 recorded first response preserves every data byte",
+          "T02 search progress followed by NO DATA remains inconclusive"
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.core.ObdParserTest",
+        "tests": 23,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "unaccounted CAN data is rejected",
+          "echo searching and compact PID response are accepted",
+          "NO DATA is inconclusive rather than an empty error list",
+          "ECU refusal is distinct from no errors",
+          "truncated CAN DTC count is rejected",
+          "Android 17 end of stream terminates rather than spinning",
+          "another PID does not count as a valid measurement",
+          "indexed CAN length mismatch is rejected",
+          "missing K line DTC byte is rejected",
+          "empty prompt is not a successful scan",
+          "multiple positive ECU responses retain all codes",
+          "null DTC cannot satisfy a positive CAN count",
+          "partial parameter response is rejected",
+          "missing CAN fragment is rejected",
+          "supported PID bits use network order and base offset",
+          "pending and permanent use the proper positive services",
+          "CAN count byte is not decoded as a DTC",
+          "indexed ELM CAN response is reassembled with its declared length",
+          "K line DTCs decode all four categories and ignore padding",
+          "valid K line zero response means no returned codes",
+          "reader stops exactly at prompt preserving the next response",
+          "adapter bus error is surfaced",
+          "response without prompt has a bounded buffer"
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.core.PromptConnectionTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "timeout closes wire instead of accepting a stale response on next request",
+          "cancellation closes blocking wire and releases pending command",
+          "fragmented response is completed at prompt and command ends with CR",
+          "idle remote EOF is observed without polling the ECU"
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.core.connection.AutomaticRetryTest",
+        "tests": 0,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": []
+      }
+    ],
+    "app": [
+      {
+        "suite": "it.multipla.obd.ConnectionDiagnosticsTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "T09 failed manual attempt with no lock reports automation still enabled",
+          "T09 invalid response is never labelled ECU unreachable",
+          "T09 NO DATA remains distinct from a malformed response",
+          "T09 export records attempts suspension and manual rearming"
+        ]
+      },
+      {
+        "suite": "it.multipla.obd.SessionServiceTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "T05 failed unblocked manual connection stops foreground work without disabling automation",
+          "AC06 AC07 activity unbind and rebind preserve service session and notification",
+          "AC08 notification stop closes session and releases wake lock",
+          "demo session cannot clear real manual connection gate",
+          "AC11 target and manual lock persist across Android store instances",
+          "T06 manual success persists rearming across Android store and session recreation"
+        ]
+      }
+    ]
+  },
+  "scenario": {
+    "uri": "classpath:features/connection/automatic-retry.feature",
+    "name": "Automatic connection stops after three failed attempts",
+    "steps": 7,
+    "statuses": [
+      "passed",
+      "passed",
+      "passed",
+      "passed",
+      "passed",
+      "passed",
+      "passed"
+    ]
+  },
+  "negative_probes": [
+    {
+      "name": "assertion",
+      "command": "./gradlew :check --continue",
+      "file": "obd-core/src/test/kotlin/it/multipla/obd/core/connection/AutomaticRetrySteps.kt",
+      "exit_code": 1,
+      "failure_detected": true,
+      "source_unchanged_by_check": true,
+      "cucumber_step_statuses": [
+        "passed",
+        "passed",
+        "passed",
+        "failed",
+        "skipped",
+        "skipped",
+        "skipped"
+      ],
+      "compilation_failed": false
+    },
+    {
+      "name": "undefined",
+      "command": "./gradlew :obd-core:test --tests it.multipla.obd.core.connection.AutomaticRetryTest",
+      "file": "obd-core/src/test/kotlin/it/multipla/obd/core/connection/AutomaticRetrySteps.kt",
+      "exit_code": 1,
+      "failure_detected": true,
+      "source_unchanged_by_check": true,
+      "cucumber_step_statuses": [
+        "passed",
+        "passed",
+        "passed",
+        "undefined",
+        "skipped",
+        "skipped",
+        "skipped"
+      ],
+      "compilation_failed": false
+    },
+    {
+      "name": "pending",
+      "command": "./gradlew :obd-core:test --tests it.multipla.obd.core.connection.AutomaticRetryTest",
+      "file": "obd-core/src/test/kotlin/it/multipla/obd/core/connection/AutomaticRetrySteps.kt",
+      "exit_code": 1,
+      "failure_detected": true,
+      "source_unchanged_by_check": true,
+      "cucumber_step_statuses": [
+        "passed",
+        "passed",
+        "passed",
+        "pending",
+        "skipped",
+        "skipped",
+        "skipped"
+      ],
+      "compilation_failed": false
+    },
+    {
+      "name": "ambiguous",
+      "command": "./gradlew :obd-core:test --tests it.multipla.obd.core.connection.AutomaticRetryTest",
+      "file": "obd-core/src/test/kotlin/it/multipla/obd/core/connection/AutomaticRetrySteps.kt",
+      "exit_code": 1,
+      "failure_detected": true,
+      "source_unchanged_by_check": true,
+      "cucumber_step_statuses": [
+        "passed",
+        "passed",
+        "passed",
+        "ambiguous",
+        "skipped",
+        "skipped",
+        "skipped"
+      ],
+      "compilation_failed": false
+    },
+    {
+      "name": "zero-scenarios",
+      "command": "./gradlew :check --continue",
+      "file": "obd-core/src/test/kotlin/it/multipla/obd/core/connection/AutomaticRetryTest.kt",
+      "exit_code": 1,
+      "failure_detected": true,
+      "source_unchanged_by_check": true,
+      "compilation_failed": false
+    },
+    {
+      "name": "missing-feature",
+      "command": "./gradlew :obd-core:test --tests it.multipla.obd.core.connection.AutomaticRetryTest",
+      "file": "obd-core/src/test/kotlin/it/multipla/obd/core/connection/AutomaticRetryTest.kt",
+      "exit_code": 1,
+      "failure_detected": true,
+      "source_unchanged_by_check": true,
+      "compilation_failed": false
+    },
+    {
+      "name": "style-1",
+      "command": "./gradlew :check --continue",
+      "file": "app/src/main/java/it/multipla/obd/MainActivity.kt",
+      "exit_code": 1,
+      "failure_detected": true,
+      "source_unchanged_by_check": true,
+      "compilation_failed": false
+    },
+    {
+      "name": "style-2",
+      "command": "./gradlew :spotlessCheck",
+      "file": "app/src/test/java/it/multipla/obd/SessionServiceTest.kt",
+      "exit_code": 1,
+      "failure_detected": true,
+      "source_unchanged_by_check": true,
+      "compilation_failed": false
+    },
+    {
+      "name": "style-3",
+      "command": "./gradlew :spotlessCheck",
+      "file": "obd-core/src/main/kotlin/it/multipla/obd/core/ConnectionController.kt",
+      "exit_code": 1,
+      "failure_detected": true,
+      "source_unchanged_by_check": true,
+      "compilation_failed": false
+    },
+    {
+      "name": "style-4",
+      "command": "./gradlew :spotlessCheck",
+      "file": "obd-core/src/test/kotlin/it/multipla/obd/core/ConnectionControllerTest.kt",
+      "exit_code": 1,
+      "failure_detected": true,
+      "source_unchanged_by_check": true,
+      "compilation_failed": false
+    },
+    {
+      "name": "style-5",
+      "command": "./gradlew :spotlessCheck",
+      "file": "build.gradle.kts",
+      "exit_code": 1,
+      "failure_detected": true,
+      "source_unchanged_by_check": true,
+      "compilation_failed": false
+    },
+    {
+      "name": "style-6",
+      "command": "./gradlew :spotlessCheck",
+      "file": "settings.gradle.kts",
+      "exit_code": 1,
+      "failure_detected": true,
+      "source_unchanged_by_check": true,
+      "compilation_failed": false
+    },
+    {
+      "name": "style-7",
+      "command": "./gradlew :spotlessCheck",
+      "file": "app/build.gradle.kts",
+      "exit_code": 1,
+      "failure_detected": true,
+      "source_unchanged_by_check": true,
+      "compilation_failed": false
+    },
+    {
+      "name": "style-8",
+      "command": "./gradlew :spotlessCheck",
+      "file": "obd-core/build.gradle.kts",
+      "exit_code": 1,
+      "failure_detected": true,
+      "source_unchanged_by_check": true,
+      "compilation_failed": false
+    }
+  ],
+  "formatting": [
+    {
+      "file": "app/src/main/java/it/multipla/obd/AndroidConnectionStore.kt",
+      "before_sha256": "3966c09dff4f79d26e32bfa3b80360d1c476efc3a89f2aad1b0e435c8d413ea2",
+      "after_sha256": "5dfafffaf36651628e60fd67348d99d6131e11ff8544d244b33e236961e86f2d"
+    },
+    {
+      "file": "app/src/main/java/it/multipla/obd/DiagnosticService.kt",
+      "before_sha256": "eaf2c29fcb4359c0c9910e11c1a92a5d8faa5a52ec310485de34a7b9abb77f30",
+      "after_sha256": "2124d8fbd84f73b4c3fcb5a46ae16faa4f78ca7a9a787764e8ce7adc70ef7573"
+    },
+    {
+      "file": "app/src/main/java/it/multipla/obd/DiagnosticsSession.kt",
+      "before_sha256": "be978c3cf306e14b725b8d1cef4f860083bf6dcf06bc9bcea95a182cfce5a59e",
+      "after_sha256": "74631443e92d2ca08446d3693f43c981469f3bbbe7003022ccb77fba42e02a5d"
+    },
+    {
+      "file": "app/src/main/java/it/multipla/obd/ElmAdapterLink.kt",
+      "before_sha256": "6dd5c95731ea2486796ce550dcef0dc54d105bc3ab1852c4a76c5695ef8098ad",
+      "after_sha256": "e236f67a60a67e659304888d90d87992e1dd3a4db88856f516f590728dd95241"
+    },
+    {
+      "file": "app/src/main/java/it/multipla/obd/MainActivity.kt",
+      "before_sha256": "90bd09ad45519a59d4678fd395f6b5999f04d3d3fd57f1b08ae8407eb475c45a",
+      "after_sha256": "02219e8ff7febfd10af42bf6171e5f401b88e37de609a2d78e854dcd478b4e0d"
+    },
+    {
+      "file": "app/src/main/java/it/multipla/obd/bluetooth/RfcommTransport.kt",
+      "before_sha256": "3ba006da9339113ec58e36b43a3fdf1ae5af2ac2d184e47e4db1254eb931377a",
+      "after_sha256": "efcd6b22199d2a0c2cca28697632207c446875cca89938876f73152ecdcfaed9"
+    },
+    {
+      "file": "app/src/test/java/it/multipla/obd/ConnectionDiagnosticsTest.kt",
+      "before_sha256": "cfecc731f99fdbef5a04f6687259f0a46f8dc0bd74654feb9ff43b93a6bbfd33",
+      "after_sha256": "311092d75bc51397deb98c0042af066688c6de544abe216f4a3c703ced9b5b2a"
+    },
+    {
+      "file": "app/src/test/java/it/multipla/obd/SessionServiceTest.kt",
+      "before_sha256": "644e8e298ef9db4c663fb41351d47177ba331dd4d46c6a3837960cf6eef7ca89",
+      "after_sha256": "b83437c89e563def876a40c082383ed7ebfe51acf3732c60a5b0e2d9f3ffcc47"
+    },
+    {
+      "file": "obd-core/src/main/kotlin/it/multipla/obd/core/ConnectionController.kt",
+      "before_sha256": "5a1ecd1c91f38c5a97d78573562745aec9a36ab1bb7978f18acd37dfa2ac2e94",
+      "after_sha256": "b57c49e45038560fac04a3c258d53d9c5e6a56bf5f44eb066e96d390b9a91cd4"
+    },
+    {
+      "file": "obd-core/src/main/kotlin/it/multipla/obd/core/DemoTransport.kt",
+      "before_sha256": "50b38d2d985dc3d473b99ffca6b1a81b55abc7d6c0e22e19a7f0920f3fc2a5ad",
+      "after_sha256": "bd5559b8f94a282b13ef852a8b6b0f9d0bdebf58dcbfd0f76d7500cab5bd9c0c"
+    },
+    {
+      "file": "obd-core/src/main/kotlin/it/multipla/obd/core/ElmSession.kt",
+      "before_sha256": "3967fe2b8e38d90816aadf24a41b65d5d8aef12bc89f553017568155e498d9d3",
+      "after_sha256": "50e9e7ecd098fdc82710958d401635c5f911690bd48606190bab0bbc100d62c3"
+    },
+    {
+      "file": "obd-core/src/main/kotlin/it/multipla/obd/core/ObdParser.kt",
+      "before_sha256": "9c7f5b98d9fd65307b7201e72eeade2e24b9bbc0ff11e90be81fd49cac7b4ece",
+      "after_sha256": "a500dfc8bddcb655bad0a2e97bc43998a4208f16702d1ec64e632c8bf835c547"
+    },
+    {
+      "file": "obd-core/src/main/kotlin/it/multipla/obd/core/PromptConnection.kt",
+      "before_sha256": "0c92e56a4d12f2e7a7dcf768146e2364b1d26bce35b6892c550f1f4e3b91e27f",
+      "after_sha256": "e325a7aa04a6fd10e7763c3df3047e64d12cae1f34ff9ae27e110bd54cbe5850"
+    },
+    {
+      "file": "obd-core/src/main/kotlin/it/multipla/obd/core/Transport.kt",
+      "before_sha256": "fdf5ec93d819773991304a499a37e7defc2ca399c433d1c4d8ce305b4e1e303c",
+      "after_sha256": "44f05901f0441fc79295571b27789b2717ad01ecc36329353c3a6d3b19e51300"
+    },
+    {
+      "file": "obd-core/src/test/kotlin/it/multipla/obd/core/AdapterInitializationTest.kt",
+      "before_sha256": "425728124fbd3e507d9ad00e4d34292e64788ddc90d144cbd28e74e5ac36420b",
+      "after_sha256": "883bddececb8f1cdb6dd4e2b3c8548912602c2ab536d84f7f7e3a174864e7554"
+    },
+    {
+      "file": "obd-core/src/test/kotlin/it/multipla/obd/core/ConnectionControllerTest.kt",
+      "before_sha256": "0fa4705ab92250f3c984f8682ea1e13a7d864b098c583e6c737191c08d6e7c4c",
+      "after_sha256": "ed10fee16e34ec455ebfd695d9e99ea78c4931abfc58f12a7c4487f552838bc9"
+    },
+    {
+      "file": "obd-core/src/test/kotlin/it/multipla/obd/core/ConnectionRecoveryTest.kt",
+      "before_sha256": "dc7e8abb8655a6d80a9bdc1998e96fbc6693130034cf45300675f0220e354ec1",
+      "after_sha256": "135da819676bd6ad29322e2c95e23e389968805349992dbed8ce3b474ead839a"
+    },
+    {
+      "file": "obd-core/src/test/kotlin/it/multipla/obd/core/ElmSessionTest.kt",
+      "before_sha256": "3d77884faeab5862c22fa32578e8ffd8edde9d694c5369faca062155b53270d0",
+      "after_sha256": "9a1ad1b04947af43b4aedab2a88973799e0ddc8340dcf89d1b8b9c10ad2439cd"
+    },
+    {
+      "file": "obd-core/src/test/kotlin/it/multipla/obd/core/FirstConnectionTest.kt",
+      "before_sha256": "ec147b5c0aa65261d5a0d192bb4f25a228c15d309624f384824057f7152e1c31",
+      "after_sha256": "e1093e9f320fb63ab5ef0911a14ada0953bfcf56c0fc703f45e137c153d8bd5a"
+    },
+    {
+      "file": "obd-core/src/test/kotlin/it/multipla/obd/core/ObdParserTest.kt",
+      "before_sha256": "56d003eead0ef29c8d0460794cf6ff3ff69ac725724bdd47df0f99b5fc2c9dda",
+      "after_sha256": "521c79ff5f38d8aff9197cfa7bf065d388735f26529506fe967d612e0f6767bb"
+    },
+    {
+      "file": "obd-core/src/test/kotlin/it/multipla/obd/core/PromptConnectionTest.kt",
+      "before_sha256": "550036de5a63ba7c58442cce2f311bdb571e3d15b4ddb4c897231d76f80b36f1",
+      "after_sha256": "b370967e9854a90586649fecf95640bf8f14a83ae109e3e8574833372be6be90"
+    },
+    {
+      "file": "settings.gradle.kts",
+      "before_sha256": "582875a0f7406bc45afa23fd3175dc745983decc696a0e18ddef3f4e3606ca46",
+      "after_sha256": "3bbed02e3fdb13e1ffcebd3603a3e70bdc3e3fae558fb1d837892855ec9ba5d5"
+    }
+  ],
+  "android_lint": [
+    {
+      "id": "AndroidGradlePluginVersion",
+      "severity": "Warning",
+      "message": "A newer version of Gradle than 8.13 is available: 8.14.6"
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning",
+      "message": "A newer version of androidx.compose:compose-bom than 2025.08.00 is available: 2026.09.00"
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning",
+      "message": "A newer version of androidx.activity:activity-compose than 1.10.1 is available: 1.13.0"
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning",
+      "message": "A newer version of androidx.lifecycle:lifecycle-viewmodel-compose than 2.9.3 is available: 2.11.0"
+    },
+    {
+      "id": "GradleDependency",
+      "severity": "Warning",
+      "message": "A newer version of androidx.lifecycle:lifecycle-runtime-compose than 2.9.3 is available: 2.11.0"
+    },
+    {
+      "id": "NewerVersionAvailable",
+      "severity": "Warning",
+      "message": "A newer version of org.jetbrains.kotlinx:kotlinx-coroutines-android than 1.10.2 is available: 1.11.0"
+    },
+    {
+      "id": "NewerVersionAvailable",
+      "severity": "Warning",
+      "message": "A newer version of org.jetbrains.kotlinx:kotlinx-coroutines-test than 1.10.2 is available: 1.11.0"
+    },
+    {
+      "id": "UseKtx",
+      "severity": "Warning",
+      "message": "Use the KTX extension function `SharedPreferences.edit` instead?"
+    },
+    {
+      "id": "UseKtx",
+      "severity": "Warning",
+      "message": "Use the KTX extension function `SharedPreferences.edit` instead?"
+    }
+  ],
+  "files": {
+    "created": [
+      ".editorconfig",
+      "obd-core/src/test/kotlin/it/multipla/obd/core/connection/AutomaticRetryTest.kt",
+      "obd-core/src/test/kotlin/it/multipla/obd/core/connection/AutomaticRetrySteps.kt",
+      "obd-core/src/test/kotlin/it/multipla/obd/core/connection/RequiredScenariosRunner.kt",
+      "obd-core/src/test/kotlin/it/multipla/obd/core/connection/ScenarioExecutionGuard.kt",
+      "docs/verification/progetto-D-0001-verifica.md",
+      "docs/verification/progetto-D-0001-risultati.json"
+    ],
+    "modified_integration_and_docs": [
+      "AGENTS.md",
+      "CONTRIBUTING.md",
+      "README.md",
+      "build.gradle.kts",
+      "obd-core/build.gradle.kts",
+      "docs/architecture/overview.md",
+      "docs/adr/README.md",
+      "docs/design/README.md",
+      "docs/design/progetto/D-0001-verifiche-automatiche/README.md"
+    ],
+    "modified_formatting_only": [
+      "app/src/main/java/it/multipla/obd/AndroidConnectionStore.kt",
+      "app/src/main/java/it/multipla/obd/DiagnosticService.kt",
+      "app/src/main/java/it/multipla/obd/DiagnosticsSession.kt",
+      "app/src/main/java/it/multipla/obd/ElmAdapterLink.kt",
+      "app/src/main/java/it/multipla/obd/MainActivity.kt",
+      "app/src/main/java/it/multipla/obd/bluetooth/RfcommTransport.kt",
+      "app/src/test/java/it/multipla/obd/ConnectionDiagnosticsTest.kt",
+      "app/src/test/java/it/multipla/obd/SessionServiceTest.kt",
+      "obd-core/src/main/kotlin/it/multipla/obd/core/ConnectionController.kt",
+      "obd-core/src/main/kotlin/it/multipla/obd/core/DemoTransport.kt",
+      "obd-core/src/main/kotlin/it/multipla/obd/core/ElmSession.kt",
+      "obd-core/src/main/kotlin/it/multipla/obd/core/ObdParser.kt",
+      "obd-core/src/main/kotlin/it/multipla/obd/core/PromptConnection.kt",
+      "obd-core/src/main/kotlin/it/multipla/obd/core/Transport.kt",
+      "obd-core/src/test/kotlin/it/multipla/obd/core/AdapterInitializationTest.kt",
+      "obd-core/src/test/kotlin/it/multipla/obd/core/ConnectionControllerTest.kt",
+      "obd-core/src/test/kotlin/it/multipla/obd/core/ConnectionRecoveryTest.kt",
+      "obd-core/src/test/kotlin/it/multipla/obd/core/ElmSessionTest.kt",
+      "obd-core/src/test/kotlin/it/multipla/obd/core/FirstConnectionTest.kt",
+      "obd-core/src/test/kotlin/it/multipla/obd/core/ObdParserTest.kt",
+      "obd-core/src/test/kotlin/it/multipla/obd/core/PromptConnectionTest.kt",
+      "settings.gradle.kts"
+    ]
+  },
+  "final_command": "./gradlew :check :app:assembleDebug :app:lintDebug --rerun-tasks --console=plain",
+  "final_exit_code": 0,
+  "formatting_patch_reverse_verified": true
+}

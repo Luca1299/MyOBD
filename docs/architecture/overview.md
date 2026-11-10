@@ -83,18 +83,25 @@ locali Robolectric; compilazione e analisi statica Android sono disponibili.
 Non è necessaria un'istanza server o un database.
 
 ADR-0003 adotta Cucumber per gli scenari nuovi o modificati e Spotless/ktlint
-per la formattazione. Alla data di questa overview gli strumenti non sono
-ancora integrati: è stato consolidato soltanto il design, compreso un pilota
-Gherkin senza runner o step. Il relativo
+per la formattazione. Gli strumenti sono integrati secondo il
 [package progetto/D-0001](../design/progetto/D-0001-verifiche-automatiche/README.md)
-è `in design`, in attesa della conferma separata per il coding. Questo stato
-non implica un cambiamento delle dipendenze applicative o dei test esistenti.
+confermato dal proprietario il 10 novembre 2026. Il runner Cucumber nel nucleo
+esegue soltanto il pilota di connessione attraverso il coordinatore reale,
+con trasporto e tempo simulati; gli scenari della futura diagnosi restano
+fuori dall'esecuzione. Le suite JUnit/Robolectric esistenti sono conservate.
+
+Spotless applica ktlint con configurazione comune adatta a Compose ai sorgenti
+Kotlin dei due moduli e agli script Gradle Kotlin. Il controllo aggregato
+verifica test locali e formattazione senza correggere i sorgenti; l'applicazione
+delle correzioni è esplicita. Versioni e comandi provati restano in
+`CONTRIBUTING.md`, risultati e limiti nel
+[rapporto D-0001](../verification/progetto-D-0001-verifica.md).
 
 ## Evidenze e limiti
 
 I rapporti in `docs/verification/` descrivono verifiche già svolte sulle
-versioni indicate. Non sono esiti della presente adozione documentale e non
-certificano nuove esecuzioni. Prove simulate, comportamento Android reale,
+versioni indicate. Le evidenze storiche non certificano nuove esecuzioni.
+Prove simulate, comportamento Android reale,
 adattatore e vettura hanno evidenze distinte.
 
 Non vengono risolti in questa sessione i temi diagnostici rinviati nei
