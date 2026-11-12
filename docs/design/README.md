@@ -108,6 +108,14 @@ e quando cambia lo stato o il perimetro autorevole.
   del processo anche dopo l’arresto del servizio, secondo ADR-0004. Le evidenze di implementazione e le prove hardware sono distinte
   dalla conferma della specifica.
 
+- [app/D-0002 — Parametri motore in tempo reale](app/D-0002-parametri-motore-in-tempo-reale/README.md)
+  — `in design`, consolidamento parziale autorizzato il 12 novembre 2026:
+  osservazione dei parametri selezionati e dichiarati disponibili,
+  comandi Avvia/Pausa/Termina, esclusione delle letture concorrenti,
+  conservazione ed esportazione. Punto 15 sospeso in attesa delle misure
+  hardware; nessuna conferma per il coding. Scenari presenti come artefatti
+  di design.
+
 ### Nucleo diagnostico
 
 Non sono ancora presenti package autonomi per l'area `obd-core`; gli scenari

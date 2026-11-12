@@ -72,8 +72,11 @@ La stessa sessione che approva una variazione architetturale aggiorna
   — accettato il 10 novembre 2026; documento storico della versione 0.2.1.
 
 - [ADR-0004 — Conservazione dei risultati nel processo](0004-conservazione-risultati-nel-processo.md)
-  — `architettura`, accettato il 10 novembre 2026: ultimo risultato reale e demo
-  in memoria fino alla terminazione del processo, con servizio arrestato da Scollega.
+  — `architettura`, accettato il 10 novembre 2026; revisione precedente
+  alla prima installazione, approvata il 12 novembre 2026 per estendere
+  la conservazione all’ultima osservazione conclusa reale e demo,
+  separatamente dalle diagnosi concluse. Estensione progettata,
+  non ancora implementata.
 
 I primi due documenti precedono queste convenzioni e mantengono testo,
 intestazioni e collegamenti originali. I loro requisiti e rapporti restano
