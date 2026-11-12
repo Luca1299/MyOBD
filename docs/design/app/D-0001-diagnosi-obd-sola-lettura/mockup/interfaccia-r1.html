@@ -1,0 +1,672 @@
+<style>
+  #multipla-preview { width: 100%; }
+  #multipla-preview * { box-sizing: border-box; }
+  #multipla-preview [hidden] { display: none !important; }
+  #multipla-preview .mp-stage { display: flex; justify-content: center; padding: 20px 12px; }
+  #multipla-preview .mp-phone {
+    --mp-bg: #0d171a; --mp-surface: #152327; --mp-line: #304348;
+    --mp-text: #e6f1f2; --mp-muted: #b0c3c8; --mp-accent: #73dec1;
+    --mp-warning: #edc381; --mp-row-pad: 12px; --mp-value-size: 30px;
+    color-scheme: dark; color: var(--mp-text); background: var(--mp-bg);
+    width: 100%; max-width: 440px; border: 1px solid #35484d; border-radius: 24px;
+    font: 400 14px/1.5 Roboto, system-ui, sans-serif; overflow: clip; container-type: inline-size;
+    box-shadow: 0 16px 40px #00141824;
+  }
+  #multipla-preview .mp-phone h1, #multipla-preview .mp-phone h2,
+  #multipla-preview .mp-phone p { margin: 0; }
+  #multipla-preview .mp-phone button { font-family: inherit; font-size: inherit; }
+  #multipla-preview .mp-header { padding: 23px 22px 18px; }
+  #multipla-preview .mp-brand { font-size: 22px; font-weight: 700; letter-spacing: .3px; line-height: 1.25; }
+  #multipla-preview .mp-car { margin-top: 6px; color: var(--mp-muted); font-size: 13px; }
+  #multipla-preview .mp-status { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 13px; }
+  #multipla-preview .mp-status-dot { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: var(--mp-accent); }
+  #multipla-preview .mp-demo { display: inline-flex; margin-top: 10px; padding: 3px 8px; border: 1px solid #8d704846; border-radius: 5px; background: #edc3810c; color: var(--mp-warning); font-size: 11px; font-weight: 600; letter-spacing: .7px; }
+  #multipla-preview .mp-tabs { display: grid; grid-template-columns: 1.4fr 1.1fr 1fr 1fr; border-top: 1px solid #30434880; border-bottom: 1px solid var(--mp-line); padding: 0 7px; }
+  #multipla-preview .mp-tab { color: var(--mp-muted); background: transparent; border: 0; padding: 16px 4px 13px; font-size: 12px !important; font-weight: 500; min-height: 48px; border-bottom: 3px solid transparent; white-space: nowrap; }
+  #multipla-preview .mp-tab[aria-selected="true"] { color: var(--mp-accent); border-bottom-color: var(--mp-accent); }
+  #multipla-preview .mp-tab:disabled { opacity: .75; }
+  #multipla-preview .mp-main { padding: 22px 18px 24px; }
+  #multipla-preview .mp-title { font-size: 23px; font-weight: 600; line-height: 1.25; letter-spacing: -.4px; }
+  #multipla-preview .mp-lead { color: var(--mp-muted); font-size: 13px; margin-top: 8px !important; }
+  #multipla-preview .mp-action { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 46px; border: 1px solid #63938a; border-radius: 12px; padding: 10px 14px; color: var(--mp-accent); background: transparent; line-height: 1.4; text-align: center; font-weight: 500; }
+  #multipla-preview .mp-action svg { width: 17px; height: 17px; flex-shrink: 0; }
+  #multipla-preview .mp-action:hover { background: #73dec10d; }
+  #multipla-preview .mp-action:disabled { opacity: .6; }
+  #multipla-preview .mp-action-primary { width: 100%; background: var(--mp-accent); color: #00382d; border-color: var(--mp-accent); }
+  #multipla-preview .mp-action-primary:hover { background: #8ae6ce; }
+  #multipla-preview .mp-export { width: 100%; margin-top: 18px; }
+  #multipla-preview .mp-capacity { margin: 10px 0 18px !important; font-size: 11.5px; color: var(--mp-muted); line-height: 1.6; }
+  #multipla-preview .mp-log { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12px; }
+  #multipla-preview .mp-log col:nth-child(1) { width: 27%; }
+  #multipla-preview .mp-log col:nth-child(2) { width: 30%; }
+  #multipla-preview .mp-log col:nth-child(3) { width: 43%; }
+  #multipla-preview .mp-log th { color: var(--mp-muted); font-size: 11.5px; text-align: left; font-weight: 500; background: #1b2a2f; padding: 10px 7px; border-bottom: 1px solid #466068; }
+  #multipla-preview .mp-log th:first-child { border-top-left-radius: 8px; }
+  #multipla-preview .mp-log th:last-child { border-top-right-radius: 8px; }
+  #multipla-preview .mp-log td { padding: var(--mp-row-pad) 7px; vertical-align: top; border-bottom: 1px solid var(--mp-line); overflow-wrap: anywhere; }
+  #multipla-preview .mp-log th + th, #multipla-preview .mp-log td + td { border-left: 1px solid #30434865; }
+  #multipla-preview .mp-log time { font-size: 11px; font-variant-numeric: tabular-nums; color: var(--mp-muted); letter-spacing: -.2px; white-space: nowrap; }
+  #multipla-preview .mp-log .mp-ms { font-size: inherit; }
+  #multipla-preview .mp-type { display: block; font-weight: 500; line-height: 1.4; }
+  #multipla-preview .mp-prefix { display: block; font-size: 11px; color: var(--mp-muted); margin-top: 4px; }
+  #multipla-preview .mp-request { color: #a5c9ee; }
+  #multipla-preview .mp-response { color: var(--mp-accent); }
+  #multipla-preview .mp-log code { color: var(--mp-text); background: transparent; padding: 0; font: 400 12px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+  #multipla-preview .mp-log-message { font-size: 12px; line-height: 1.5; }
+  #multipla-preview .mp-footnote { margin-top: 16px !important; font-size: 11.5px; color: var(--mp-muted); line-height: 1.6; }
+  #multipla-preview .mp-form { margin-top: 20px; padding: 0; border: 0; min-width: 0; }
+  #multipla-preview .mp-form legend { color: var(--mp-muted); font-size: 12px; padding: 0; margin-bottom: 9px; }
+  #multipla-preview .mp-chips { display: flex; gap: 9px; margin-bottom: 16px; }
+  #multipla-preview .mp-chip { min-height: 42px; display: inline-flex; align-items: center; gap: 7px; padding: 8px 17px; border: 1px solid #53666c; border-radius: 10px; background: transparent; color: var(--mp-text); }
+  #multipla-preview .mp-chip[aria-pressed="true"] { background: #23483e; border-color: #487a69; color: #a7f2dc; }
+  #multipla-preview .mp-chip:disabled { opacity: .6; }
+  #multipla-preview .mp-check { display: inline-block; width: 12px; font-size: 13px; }
+  #multipla-preview .mp-chip[aria-pressed="false"] .mp-check { display: none; }
+  #multipla-preview .mp-sample-time { margin: 18px 0 12px !important; font-size: 12px; color: var(--mp-muted); }
+  #multipla-preview .mp-sample-time strong { font-weight: 500; color: var(--mp-text); }
+  #multipla-preview .mp-engine { padding: 13px 14px; border: 1px solid #705b3c; border-radius: 12px; background: #30281e; margin-bottom: 16px; }
+  #multipla-preview .mp-engine-label { display: flex; gap: 8px; align-items: center; color: var(--mp-warning); font-size: 13px; font-weight: 500; }
+  #multipla-preview .mp-engine-label svg { width: 17px; height: 17px; flex: 0 0 17px; }
+  #multipla-preview .mp-engine p { font-size: 12px; margin-top: 5px; color: #e5d7bf; }
+  #multipla-preview .mp-values { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
+  #multipla-preview .mp-value-card { padding: 14px; min-width: 0; background: var(--mp-surface); border: 1px solid #263a40; border-radius: 12px; }
+  #multipla-preview .mp-value-label { display: block; min-height: 36px; color: var(--mp-muted); font-size: 12px; line-height: 1.5; }
+  #multipla-preview .mp-number { font-size: var(--mp-value-size); line-height: 1.25; letter-spacing: -.7px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--mp-accent); }
+  #multipla-preview .mp-unit { font-size: 12px; margin-left: 4px; color: var(--mp-muted); letter-spacing: 0; font-weight: 400; white-space: nowrap; }
+  #multipla-preview .mp-value-card.mp-wide { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  #multipla-preview .mp-wide .mp-value-label { min-height: 0; }
+  #multipla-preview .mp-wide .mp-number { white-space: nowrap; font-size: 23px; }
+  #multipla-preview .mp-corrections { margin-top: 19px; }
+  #multipla-preview .mp-section-title { font-size: 13px; font-weight: 500; margin-bottom: 9px !important; }
+  #multipla-preview .mp-section-title span { font-weight: 400; color: var(--mp-muted); }
+  #multipla-preview .mp-correction { display: flex; gap: 14px; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--mp-line); }
+  #multipla-preview .mp-correction-label { color: var(--mp-muted); font-size: 13px; }
+  #multipla-preview .mp-correction .mp-number { font-size: 22px; white-space: nowrap; }
+  #multipla-preview .mp-empty { margin-top: 20px; padding: 18px 0; border-top: 1px solid var(--mp-line); color: var(--mp-muted); font-size: 13px; }
+  #multipla-preview .mp-external-status { max-width: 440px; margin: 8px auto 0; color: light-dark(#485961, #b0c3c8); font: 400 12px/1.5 system-ui, sans-serif; }
+  #multipla-preview .mp-external-status:empty { display: none; }
+  #multipla-preview .mp-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  #multipla-preview .mp-panel { background: var(--mp-surface); border: 1px solid #2a3e44; border-radius: 12px; padding: 16px; margin-top: 16px; min-width: 0; }
+  #multipla-preview .mp-panel-title { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+  #multipla-preview .mp-panel-title h2 { font-size: 15px; font-weight: 500; line-height: 1.4; }
+  #multipla-preview .mp-panel p { font-size: 12px; color: var(--mp-muted); margin-top: 7px; overflow-wrap: anywhere; }
+  #multipla-preview .mp-badge { display: inline-flex; padding: 3px 7px; border-radius: 5px; background: #25363c; color: var(--mp-muted); font-size: 11px; line-height: 1.5; }
+  #multipla-preview .mp-badge[data-tone="acquired"] { background: #214337; color: #a6e9d4; }
+  #multipla-preview .mp-badge[data-tone="warning"] { background: #453722; color: var(--mp-warning); }
+  #multipla-preview .mp-pair { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--mp-line); font-size: 13px; }
+  #multipla-preview .mp-pair:last-child { border-bottom: 0; }
+  #multipla-preview .mp-pair > :first-child { color: var(--mp-muted); }
+  #multipla-preview .mp-pair > :last-child { text-align: right; font-weight: 500; overflow-wrap: anywhere; }
+  #multipla-preview .mp-good { color: var(--mp-accent); }
+  #multipla-preview .mp-warning-text { color: var(--mp-warning) !important; }
+  #multipla-preview .mp-neutral-text { color: var(--mp-muted); }
+  #multipla-preview .mp-stack { display: grid; gap: 10px; margin-top: 14px; }
+  #multipla-preview .mp-stack .mp-action { width: 100%; }
+  #multipla-preview .mp-guidance { padding: 0 0 0 18px; margin: 8px 0 12px; color: var(--mp-muted); font-size: 12px; }
+  #multipla-preview .mp-guidance li { margin: 5px 0; }
+  #multipla-preview .mp-text-action { border: 0; padding: 9px 0; background: transparent; color: var(--mp-accent); min-height: 44px; text-align: left; }
+  #multipla-preview .mp-device { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+  #multipla-preview .mp-device input { width: 19px; height: 19px; accent-color: var(--mp-accent); margin: 0; flex: 0 0 19px; }
+  #multipla-preview .mp-device strong { display: block; font-size: 14px; font-weight: 500; }
+  #multipla-preview .mp-device small { display: block; font-size: 12px; color: var(--mp-muted); margin-top: 3px; }
+  #multipla-preview .mp-connection-detail { margin-top: 12px !important; }
+  #multipla-preview .mp-panel .mp-action { margin-top: 12px; }
+  #multipla-preview .mp-diagnosis-chips { flex-wrap: wrap; gap: 7px; }
+  #multipla-preview .mp-diagnosis-chips .mp-chip { padding: 8px 11px; font-size: 12px; }
+  #multipla-preview .mp-running { margin: 14px 0; border-left: 3px solid var(--mp-accent); padding-left: 13px; }
+  #multipla-preview .mp-running strong { display: block; font-size: 14px; font-weight: 500; }
+  #multipla-preview .mp-running p { margin-top: 5px; color: var(--mp-muted); font-size: 12px; }
+  #multipla-preview .mp-running .mp-action { margin-top: 12px; }
+  #multipla-preview .mp-context { display: grid; gap: 8px; margin: 12px 0 0; }
+  #multipla-preview .mp-context div { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 10px; }
+  #multipla-preview .mp-context dt, #multipla-preview .mp-context dd { margin: 0; font-size: 12px; overflow-wrap: anywhere; }
+  #multipla-preview .mp-context dt { color: var(--mp-muted); }
+  #multipla-preview .mp-section-time { margin: -2px 0 12px !important; font-size: 11px !important; }
+  #multipla-preview .mp-code { color: var(--mp-warning); font: 500 21px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; }
+  #multipla-preview .mp-code-description { color: var(--mp-text) !important; font-size: 14px !important; }
+  #multipla-preview .mp-source { margin-top: 11px; color: var(--mp-muted); font-size: 11.5px; overflow-wrap: anywhere; }
+  #multipla-preview .mp-source summary { min-height: 36px; padding: 8px 0; }
+  #multipla-preview .mp-source p { font-size: 11.5px; }
+  #multipla-preview .mp-source code { font-size: 11px; color: var(--mp-muted); background: transparent; overflow-wrap: anywhere; }
+  #multipla-preview .mp-monitor { width: 100%; border-collapse: collapse; margin-top: 12px; table-layout: fixed; }
+  #multipla-preview .mp-monitor th, #multipla-preview .mp-monitor td { padding: 9px 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--mp-line); font-size: 12px; overflow-wrap: anywhere; }
+  #multipla-preview .mp-monitor th { color: var(--mp-muted); font-weight: 400; width: 57%; padding-right: 12px; }
+  #multipla-preview .mp-monitor td { text-align: right; }
+  #multipla-preview .mp-panel .mp-values { margin-top: 12px; }
+  #multipla-preview .mp-panel .mp-value-card { padding: 12px; background: #102025; }
+  #multipla-preview .mp-panel .mp-number { font-size: 25px; }
+  #multipla-preview .mp-panel .mp-wide .mp-number { font-size: 22px; }
+  #multipla-preview .mp-diag-result { margin-top: 18px; }
+  @container (max-width: 365px) {
+    #multipla-preview .mp-header { padding: 19px 16px 16px; }
+    #multipla-preview .mp-main { padding: 20px 14px; }
+    #multipla-preview .mp-tab { font-size: 11px !important; }
+    #multipla-preview .mp-log time .mp-ms { display: block; }
+    #multipla-preview .mp-log td, #multipla-preview .mp-log th { padding-left: 6px; padding-right: 6px; }
+    #multipla-preview .mp-log code { font-size: 11.5px; }
+    #multipla-preview .mp-value-card { padding: 12px; }
+    #multipla-preview .mp-value-label { min-height: 40px; }
+    #multipla-preview .mp-number { font-size: 27px; }
+    #multipla-preview .mp-unit { font-size: 11px; }
+    #multipla-preview .mp-context div { grid-template-columns: 1fr; gap: 2px; }
+    #multipla-preview .mp-panel .mp-values { grid-template-columns: minmax(0, 1fr); }
+    #multipla-preview .mp-panel .mp-value-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    #multipla-preview .mp-panel .mp-value-label { min-height: 0; }
+    #multipla-preview .mp-panel .mp-number { white-space: nowrap; }
+  }
+  @media (max-width: 350px) {
+    #multipla-preview .mp-stage { padding: 12px 0; }
+  }
+</style>
+
+<div id="multipla-preview">
+  <div class="mp-stage viz-dotted-background">
+    <article class="mp-phone" aria-label="Mockup Multipla OBD: collegamento, parametri, diagnosi e registro">
+      <header class="mp-header">
+        <div class="mp-brand" aria-label="Multipla: diagnosi di bordo, On-Board Diagnostics">MULTIPLA / OBD</div>
+        <p class="mp-car">2005 · benzina + metano originale</p>
+        <div class="mp-status"><span class="mp-status-dot" id="mp-status-dot" aria-hidden="true"></span><span id="mp-global-status">Centralina OBD raggiunta</span></div>
+        <div class="mp-demo" id="mp-mode-label">DEMO · DATI SIMULATI</div>
+      </header>
+
+      <nav class="mp-tabs" role="tablist" aria-label="Sezioni dell’app">
+        <button class="mp-tab cursor-interaction" type="button" role="tab" id="mp-tab-connection" aria-controls="mp-connection" aria-selected="true" data-screen="connection">Collegamento</button>
+        <button class="mp-tab cursor-interaction" type="button" role="tab" id="mp-tab-parameters" aria-controls="mp-parameters" aria-selected="false" data-screen="parameters">Parametri</button>
+        <button class="mp-tab cursor-interaction" type="button" role="tab" id="mp-tab-diagnosis" aria-controls="mp-diagnosis" aria-selected="false" data-screen="diagnosis">Diagnosi</button>
+        <button class="mp-tab cursor-interaction" type="button" role="tab" id="mp-tab-register" aria-controls="mp-register" aria-selected="false" data-screen="register">Registro</button>
+      </nav>
+
+      <section class="mp-main" id="mp-connection" role="tabpanel" aria-labelledby="mp-tab-connection">
+        <h1 class="mp-title">Collegamento</h1>
+        <p class="mp-lead">Adattatore e centralina sono due passaggi distinti del collegamento.</p>
+
+        <div class="mp-panel" aria-label="Stato del collegamento">
+          <div class="mp-panel-title"><h2>Stato della sessione</h2><span class="mp-badge" id="mp-link-badge" data-tone="acquired">Pronta</span></div>
+          <div class="mp-pair"><span>Adattatore</span><span id="mp-adapter-state" class="mp-good">Collegato</span></div>
+          <div class="mp-pair"><span>Centralina OBD</span><span id="mp-vehicle-state" class="mp-good">Raggiunta</span></div>
+          <div id="mp-link-details">
+            <dl class="mp-context">
+              <div><dt>Adattatore</dt><dd id="mp-adapter-name">ELM327 DEMO</dd></div>
+              <div id="mp-protocol-row"><dt>Protocollo</dt><dd id="mp-protocol-name">ISO 9141-2 · SIMULATO</dd></div>
+            </dl>
+            <p id="mp-supported-count">8 identificatori di parametro (PID) rilevati nelle pagine interrogate.</p>
+            <p>L’identità della centralina Fiat/metano resta da verificare.</p>
+          </div>
+          <p class="mp-warning-text mp-connection-detail" id="mp-link-message" hidden></p>
+          <button class="mp-action cursor-interaction" id="mp-recheck" type="button" hidden>Riprova verifica centralina</button>
+        </div>
+
+        <div class="mp-panel" aria-label="Preparazione del primo collegamento">
+          <div class="mp-panel-title"><h2>La prima connessione</h2></div>
+          <ol class="mp-guidance">
+            <li>Con l’auto ferma, inserisci l’adattatore e porta il quadro su ON.</li>
+            <li>Associa OBDII nelle impostazioni Bluetooth del telefono.</li>
+            <li>Seleziona OBDII e salvalo una volta nell’app.</li>
+          </ol>
+          <p>Alle aperture successive il collegamento sarà automatico.</p>
+          <button class="mp-action cursor-interaction" id="mp-bluetooth-settings" type="button"><i data-lucide="bluetooth" aria-hidden="true"></i>Impostazioni Bluetooth</button>
+          <button class="mp-action mp-action-primary cursor-interaction" id="mp-permission" type="button" hidden>Autorizza Bluetooth e notifiche</button>
+          <button class="mp-action cursor-interaction" id="mp-notification" type="button" hidden>Consenti la notifica della sessione</button>
+        </div>
+
+        <div class="mp-panel" id="mp-devices" aria-label="Dispositivi associati">
+          <div class="mp-panel-title"><h2>Dispositivi già associati</h2></div>
+          <label class="mp-device"><input type="radio" name="mp-device" id="mp-device-choice" checked disabled><span><strong>OBDII</strong><small>ID …00:00:01 · esempio simulato</small></span></label>
+          <button class="mp-text-action cursor-interaction" id="mp-refresh-devices" type="button">Aggiorna elenco</button>
+          <button class="mp-action mp-action-primary cursor-interaction" id="mp-save-device" type="button" disabled>Salva dispositivo OBDII</button>
+          <button class="mp-action cursor-interaction" id="mp-manual-connect" type="button" hidden>Connetti manualmente</button>
+          <p id="mp-demo-isolation">La demo non modifica il profilo del dispositivo reale.</p>
+        </div>
+
+        <div class="mp-stack">
+          <button class="mp-action cursor-interaction" id="mp-mode-switch" type="button">Torna al dispositivo reale</button>
+          <button class="mp-action cursor-interaction" id="mp-disconnect" type="button">Scollega / annulla</button>
+        </div>
+        <p class="mp-footnote">La sessione continua passando a un’altra app o spegnendo lo schermo. Puoi interromperla qui o dalla notifica.</p>
+        <p class="mp-footnote">Versione 0.3.2 · letture diagnostiche</p>
+      </section>
+
+      <section class="mp-main" id="mp-diagnosis" role="tabpanel" aria-labelledby="mp-tab-diagnosis" hidden>
+        <h1 class="mp-title">Diagnosi OBD motore</h1>
+        <p class="mp-lead">Informazioni generiche leggibili dal motore. Non è una scansione di tutte le centraline.</p>
+        <fieldset class="mp-form">
+          <legend>Alimentazione annotata manualmente prima della lettura</legend>
+          <div class="mp-chips mp-diagnosis-chips" aria-label="Alimentazione per la diagnosi">
+            <button class="mp-chip cursor-interaction" type="button" data-fuel="Non annotata" aria-pressed="false"><span class="mp-check" aria-hidden="true">✓</span>Non annotata</button>
+            <button class="mp-chip cursor-interaction" type="button" data-fuel="Benzina" aria-pressed="false"><span class="mp-check" aria-hidden="true">✓</span>Benzina</button>
+            <button class="mp-chip cursor-interaction" type="button" data-fuel="Metano" aria-pressed="true"><span class="mp-check" aria-hidden="true">✓</span>Metano</button>
+          </div>
+          <button class="mp-action mp-action-primary cursor-interaction" id="mp-start-diagnosis" type="button">Avvia diagnosi</button>
+        </fieldset>
+        <p class="mp-footnote" id="mp-diagnosis-prerequisite" hidden>Verifica prima la centralina dalla scheda Collegamento.</p>
+        <div class="mp-running" id="mp-diagnosis-running" hidden aria-live="polite">
+          <strong id="mp-diagnosis-phase">Acquisizione in corso…</strong>
+          <p id="mp-diagnosis-stage">Spia e controlli antinquinamento</p>
+          <button class="mp-action cursor-interaction" id="mp-interrupt-diagnosis" type="button">Interrompi diagnosi</button>
+          <p>La richiesta in corso termina entro il proprio limite di attesa. Per chiudere il collegamento usa Scollega nella scheda Collegamento.</p>
+        </div>
+        <p class="mp-empty" id="mp-diagnosis-empty" hidden>Diagnosi non avviata</p>
+
+        <div class="mp-diag-result" id="mp-diagnosis-results">
+          <div class="mp-panel" aria-label="Riepilogo della diagnosi">
+            <div class="mp-panel-title"><h2>Riepilogo dell’acquisizione</h2><span class="mp-badge" id="mp-diagnosis-outcome" data-tone="warning">Parziale</span></div>
+            <p id="mp-diagnosis-reason">Una o più sezioni hanno dati mancanti o letture non conclusive.</p>
+            <dl class="mp-context">
+              <div><dt>Tentativo</dt><dd id="mp-diagnosis-id">Diagnosi #1</dd></div>
+              <div><dt>Modalità</dt><dd id="mp-diagnosis-mode">DEMO · DATI SIMULATI</dd></div>
+              <div><dt>Alimentazione</dt><dd id="mp-diagnosis-fuel">Metano · annotata manualmente</dd></div>
+              <div><dt>Adattatore</dt><dd id="mp-diagnosis-adapter">OBDII · DEMO / ELM327 DEMO</dd></div>
+              <div><dt>Protocollo</dt><dd id="mp-diagnosis-protocol">ISO 9141-2 · SIMULATO</dd></div>
+              <div><dt>Inizio</dt><dd>12 nov 2026 · 14:32:10</dd></div>
+              <div id="mp-diagnosis-end-row"><dt>Fine</dt><dd id="mp-diagnosis-end">14:32:16 · durata 6.000 ms</dd></div>
+            </dl>
+            <p>Orari del telefono. Le letture sono sequenziali, non una fotografia simultanea della vettura.</p>
+          </div>
+
+          <div class="mp-panel" data-diag-stage="1" aria-label="Codici memorizzati">
+            <div class="mp-panel-title"><h2>Codici memorizzati</h2><span class="mp-badge" data-section-status data-tone="acquired">Dati acquisiti</span></div>
+            <p class="mp-section-time" data-section-time>Lettura · 14:32:12</p>
+            <div data-section-body>
+              <div class="mp-code">P0171</div>
+              <p class="mp-code-description">Miscela troppo magra, banco 1</p>
+              <details class="mp-source"><summary class="cursor-interaction">Fonte della descrizione</summary><p>OBDex · CC0-1.0 · https://github.com/foerbsnavi/OBDex</p><p>Versione <code>9ba1ffa095f3140d9e21b985b322ddea3134bb60 · it-1</code></p></details>
+            </div>
+          </div>
+          <div class="mp-panel" data-diag-stage="2" aria-label="Codici in attesa">
+            <div class="mp-panel-title"><h2>Codici in attesa</h2><span class="mp-badge" data-section-status>Nessun codice restituito</span></div>
+            <p class="mp-section-time" data-section-time>Lettura · 14:32:13</p>
+            <div data-section-body><p>Risposta valida senza codici in questa categoria.</p></div>
+          </div>
+          <div class="mp-panel" data-diag-stage="3" aria-label="Codici permanenti">
+            <div class="mp-panel-title"><h2>Codici permanenti</h2><span class="mp-badge" data-section-status data-tone="warning">Lettura non conclusiva</span></div>
+            <p class="mp-section-time" data-section-time>Lettura · 14:32:14</p>
+            <div data-section-body><p class="mp-warning-text">Nessun dato ricevuto per questa richiesta.</p><p>La risposta «NO DATA» non indica assenza di codici né funzione non supportata.</p></div>
+          </div>
+          <p class="mp-footnote">Centralina di origine non identificata. Nessuna attribuzione alla gestione benzina o metano.</p>
+
+          <div class="mp-panel" data-diag-stage="0" aria-label="Spia e monitor antinquinamento">
+            <div class="mp-panel-title"><h2>Spia e controlli antinquinamento</h2><span class="mp-badge" data-section-status data-tone="acquired">Dati acquisiti</span></div>
+            <p class="mp-section-time" data-section-time>Lettura · 14:32:11</p>
+            <div data-section-body>
+              <p>Readiness: completamento dei monitor dall’ultima cancellazione dei codici.</p>
+              <p class="mp-warning-text">Spia motore: richiesta accesa dalla centralina</p>
+              <p>Codici confermati dichiarati: <strong>1</strong></p>
+              <table class="mp-monitor" aria-label="Stato dei monitor antinquinamento simulati"><tbody>
+                <tr><th scope="row">Mancate accensioni</th><td class="mp-good">Completato</td></tr>
+                <tr><th scope="row">Sistema carburante</th><td class="mp-good">Completato</td></tr>
+                <tr><th scope="row">Componenti</th><td class="mp-good">Completato</td></tr>
+                <tr><th scope="row">Catalizzatore</th><td class="mp-good">Completato</td></tr>
+                <tr><th scope="row">Catalizzatore riscaldato</th><td class="mp-neutral-text">Non supportato</td></tr>
+                <tr><th scope="row">Sistema evaporativo</th><td class="mp-warning-text">Incompleto</td></tr>
+                <tr><th scope="row">Aria secondaria</th><td class="mp-neutral-text">Non supportato</td></tr>
+                <tr><th scope="row">Sensore ossigeno</th><td class="mp-good">Completato</td></tr>
+                <tr><th scope="row">Riscaldatore sensore ossigeno</th><td class="mp-good">Completato</td></tr>
+                <tr><th scope="row">Ricircolo gas di scarico</th><td class="mp-neutral-text">Non supportato</td></tr>
+              </tbody></table>
+            </div>
+          </div>
+
+          <div class="mp-panel" data-diag-stage="4" aria-label="Dati memorizzati in relazione al guasto">
+            <div class="mp-panel-title"><h2>Dati del guasto · freeze frame</h2><span class="mp-badge" data-section-status data-tone="acquired">Dati acquisiti</span></div>
+            <p class="mp-section-time" data-section-time>Lettura · 14:32:15</p>
+            <div data-section-body>
+              <p>Codice restituito per il frame: <strong>P0171</strong></p>
+              <div class="mp-values"><div class="mp-value-card"><span class="mp-value-label">Giri motore</span><div class="mp-number">1024<span class="mp-unit">giri/min</span></div></div><div class="mp-value-card"><span class="mp-value-label">Velocità</span><div class="mp-number">20<span class="mp-unit">km/h</span></div></div></div>
+              <p>Non dichiarati disponibili nel frame: refrigerante, pressione collettore, farfalla e correzioni di carburazione breve e lunga.</p>
+              <p>Frame 00. Associazione fra risposte, codice e centralina non verificata; i valori non garantiscono un unico frame coerente.</p>
+              <p>Data e ora del guasto non disponibili. L’ora di lettura non è l’ora del guasto.</p>
+            </div>
+          </div>
+
+          <div class="mp-panel" data-diag-stage="5" aria-label="Parametri attuali della diagnosi">
+            <div class="mp-panel-title"><h2>Parametri attuali</h2><span class="mp-badge" data-section-status data-tone="acquired">Dati acquisiti</span></div>
+            <p class="mp-section-time" data-section-time>Lettura · 14:32:16</p>
+            <div data-section-body>
+              <div class="mp-values">
+                <div class="mp-value-card"><span class="mp-value-label">Giri motore</span><div class="mp-number">820<span class="mp-unit">giri/min</span></div></div>
+                <div class="mp-value-card"><span class="mp-value-label">Temperatura<br>refrigerante</span><div class="mp-number">88<span class="mp-unit">°C</span></div></div>
+                <div class="mp-value-card"><span class="mp-value-label">Velocità</span><div class="mp-number">0<span class="mp-unit">km/h</span></div></div>
+                <div class="mp-value-card"><span class="mp-value-label">Pressione assoluta<br>collettore</span><div class="mp-number">34<span class="mp-unit">kPa</span></div></div>
+                <div class="mp-value-card mp-wide"><span class="mp-value-label">Posizione farfalla</span><div class="mp-number">3,1<span class="mp-unit">%</span></div></div>
+              </div>
+              <div class="mp-correction"><span class="mp-correction-label">Correzione breve · banco 1</span><div class="mp-number">1,6<span class="mp-unit">%</span></div></div>
+              <div class="mp-correction"><span class="mp-correction-label">Correzione lunga · banco 1</span><div class="mp-number">6,3<span class="mp-unit">%</span></div></div>
+            </div>
+          </div>
+          <p class="mp-footnote">Il completamento non certifica la salute della vettura né l’esito della revisione. Le descrizioni indicano condizioni rilevate, senza individuare cause esatte o riparazioni.</p>
+          <p class="mp-footnote">Una nuova diagnosi sostituisce il tentativo precedente della stessa modalità. Esporta il rapporto per conservarlo oltre la sessione.</p>
+          <button class="mp-action mp-export cursor-interaction" id="mp-export-diagnosis" type="button"><i data-lucide="download" aria-hidden="true"></i>Esporta rapporto della diagnosi .txt</button>
+        </div>
+      </section>
+
+      <section class="mp-main" id="mp-register" role="tabpanel" aria-labelledby="mp-tab-register" hidden>
+        <h1 class="mp-title">Registro della sessione</h1>
+        <p class="mp-lead">Richieste, risposte ed eventi del collegamento, in ordine di acquisizione.</p>
+        <button class="mp-action mp-export cursor-interaction" id="mp-export" type="button"><i data-lucide="download" aria-hidden="true"></i>Esporta rapporto della sessione .txt</button>
+        <p class="mp-capacity">Fino a 120 voci a schermo · fino a 400 nel rapporto</p>
+
+        <table class="mp-log" aria-label="Esempi simulati di voci del registro">
+          <caption class="mp-sr-only">Ora del telefono, tipo di evento e contenuto originale. TX significa richiesta inviata; RX significa risposta ricevuta.</caption>
+          <colgroup><col><col><col></colgroup>
+          <thead><tr><th scope="col">Ora</th><th scope="col">Tipo</th><th scope="col">Contenuto</th></tr></thead>
+          <tbody>
+            <tr><td><time datetime="14:32:01.120">14:32:01<span class="mp-ms">.120</span></time></td><td><span class="mp-type">Stato del collegamento</span><span class="mp-prefix">STATO</span></td><td class="mp-log-message">Centralina OBD raggiunta</td></tr>
+            <tr><td><time datetime="14:32:02.010">14:32:02<span class="mp-ms">.010</span></time></td><td><span class="mp-type">Nota della sessione</span><span class="mp-prefix">NOTA</span></td><td class="mp-log-message">Alimentazione indicata manualmente: Metano</td></tr>
+            <tr><td><time datetime="14:32:03.240">14:32:03<span class="mp-ms">.240</span></time></td><td><span class="mp-type mp-request">Richiesta inviata</span><span class="mp-prefix">TX</span></td><td><code>010C</code></td></tr>
+            <tr><td><time datetime="14:32:03.320">14:32:03<span class="mp-ms">.320</span></time></td><td><span class="mp-type mp-response">Risposta ricevuta</span><span class="mp-prefix">RX</span></td><td><code>41 0C 0C D0
+&gt;</code></td></tr>
+            <tr><td><time datetime="14:32:03.400">14:32:03<span class="mp-ms">.400</span></time></td><td><span class="mp-type mp-request">Richiesta inviata</span><span class="mp-prefix">TX</span></td><td><code>0105</code></td></tr>
+            <tr><td><time datetime="14:32:03.480">14:32:03<span class="mp-ms">.480</span></time></td><td><span class="mp-type mp-response">Risposta ricevuta</span><span class="mp-prefix">RX</span></td><td><code>41 05 80
+&gt;</code></td></tr>
+          </tbody>
+        </table>
+        <p class="mp-footnote">Orari riferiti al telefono. Il rapporto contiene il contesto della sessione, i dati raccolti e gli scambi conservati.</p>
+      </section>
+
+      <section class="mp-main" id="mp-parameters" role="tabpanel" aria-labelledby="mp-tab-parameters" hidden>
+        <h1 class="mp-title">Un campione del motore</h1>
+        <p class="mp-lead">Lettura singola. I valori vengono acquisiti in sequenza.</p>
+        <fieldset class="mp-form">
+          <legend>Alimentazione annotata manualmente</legend>
+          <div class="mp-chips" aria-label="Alimentazione annotata">
+            <button class="mp-chip cursor-interaction" type="button" data-fuel="Benzina" aria-pressed="false"><span class="mp-check" aria-hidden="true">✓</span>Benzina</button>
+            <button class="mp-chip cursor-interaction" type="button" data-fuel="Metano" aria-pressed="true"><span class="mp-check" aria-hidden="true">✓</span>Metano</button>
+          </div>
+          <button class="mp-action mp-action-primary cursor-interaction" type="button" id="mp-read"><i data-lucide="refresh-cw" aria-hidden="true"></i><span id="mp-read-label">Leggi parametri disponibili</span></button>
+        </fieldset>
+
+        <p class="mp-sample-time" id="mp-sample-time" aria-live="polite">Campione completato alle <strong>14:32:04.120</strong> · Metano</p>
+        <div id="mp-results">
+          <div class="mp-engine">
+            <div class="mp-engine-label"><i data-lucide="circle-alert" aria-hidden="true"></i>Spia motore</div>
+            <p>Richiesta accesa dalla centralina</p>
+            <p>Codici confermati dichiarati: <strong>1</strong></p>
+          </div>
+          <div class="mp-values" aria-label="Valori del campione simulato">
+            <div class="mp-value-card"><span class="mp-value-label">Giri motore</span><div class="mp-number">820<span class="mp-unit">giri/min</span></div></div>
+            <div class="mp-value-card"><span class="mp-value-label">Temperatura<br>refrigerante</span><div class="mp-number">88<span class="mp-unit">°C</span></div></div>
+            <div class="mp-value-card"><span class="mp-value-label">Velocità</span><div class="mp-number">0<span class="mp-unit">km/h</span></div></div>
+            <div class="mp-value-card"><span class="mp-value-label">Pressione assoluta<br>collettore</span><div class="mp-number">34<span class="mp-unit">kPa</span></div></div>
+            <div class="mp-value-card mp-wide"><span class="mp-value-label">Posizione farfalla</span><div class="mp-number">3,1<span class="mp-unit">%</span></div></div>
+          </div>
+          <div class="mp-corrections">
+            <h2 class="mp-section-title">Correzioni di carburazione <span>· banco 1</span></h2>
+            <div class="mp-correction"><span class="mp-correction-label">Correzione breve</span><div class="mp-number">1,6<span class="mp-unit">%</span></div></div>
+            <div class="mp-correction"><span class="mp-correction-label">Correzione lunga</span><div class="mp-number">6,3<span class="mp-unit">%</span></div></div>
+          </div>
+        </div>
+        <p class="mp-empty" id="mp-empty" hidden>Nessun campione per questa annotazione. Premi «Leggi parametri disponibili».</p>
+        <p class="mp-footnote">L’app non rileva automaticamente l’alimentazione. Per conservare il campione, esporta il rapporto dal Registro prima di una nuova lettura.</p>
+      </section>
+    </article>
+  </div>
+  <p class="mp-external-status" id="mp-preview-status" role="status" aria-live="polite"></p>
+</div>
+
+<script>
+(() => {
+  const root = document.getElementById('multipla-preview');
+  const phone = root.querySelector('.mp-phone');
+  const tabs = Array.from(root.querySelectorAll('[data-screen]'));
+  const fuels = Array.from(root.querySelectorAll('[data-fuel]'));
+  const read = root.querySelector('#mp-read');
+  const readLabel = root.querySelector('#mp-read-label');
+  const results = root.querySelector('#mp-results');
+  const empty = root.querySelector('#mp-empty');
+  const sampleTime = root.querySelector('#mp-sample-time');
+  const status = root.querySelector('#mp-preview-status');
+  const screens = ['connection', 'parameters', 'diagnosis', 'register'];
+  const stageNames = ['Spia e controlli antinquinamento', 'Codici memorizzati', 'Codici in attesa', 'Codici permanenti', 'Dati del guasto · freeze frame', 'Parametri attuali'];
+  const state = {
+    screen: 'connection', fuel: 'Metano', hasSample: true, busy: false,
+    mode: 'demo', link: 'ready', permission: true, notifications: true, realSaved: false,
+    sequence: 1, diagnoses: { demo: { id: 1, phase: 'partial', completed: 6, mode: 'demo', fuel: 'Metano', reason: '' }, real: null }
+  };
+  let linkTimer = null;
+  let diagnosisTimer = null;
+  let readTimer = null;
+  const saved = window.openai && window.openai.widgetState;
+  const restored = saved && (saved.modelContent || saved);
+  if (restored && restored.previewVersion === 2 && screens.includes(restored.screen)) state.screen = restored.screen;
+  if (restored && ['Benzina', 'Metano', 'Non annotata'].includes(restored.fuel)) state.fuel = restored.fuel;
+  if (restored && typeof restored.hasSample === 'boolean') state.hasSample = restored.hasSample;
+
+  const get = id => root.querySelector('#' + id);
+  const currentDiagnosis = () => state.diagnoses[state.mode];
+  const running = d => d && ['acquiring', 'stopping'].includes(d.phase);
+  const linkBusy = () => ['connecting', 'probing'].includes(state.link);
+  const busy = () => state.busy || linkBusy() || !!running(currentDiagnosis());
+  const connected = () => ['ready', 'adapter', 'probing'].includes(state.link);
+  const ready = () => state.link === 'ready';
+  const linkLabels = {
+    ready: 'Centralina OBD raggiunta', adapter: 'Adattatore collegato · verifica centralina non completata',
+    connecting: 'Collegamento · tentativo 1/3', probing: 'Adattatore collegato · verifica centralina…',
+    setup: 'Configurazione necessaria', manual: 'Connessione manuale richiesta',
+    stopped: 'Sessione interrotta', idle: 'Pronto per una nuova sessione'
+  };
+
+  function persist() {
+    if (!window.openai || !window.openai.setWidgetState) return;
+    const next = { modelContent: { previewVersion: 2, screen: state.screen, fuel: state.fuel, hasSample: state.hasSample }, privateContent: null };
+    try { window.openai.setWidgetState(next).catch(() => {}); } catch (_) {}
+  }
+  function render() {
+    tabs.forEach(tab => tab.setAttribute('aria-selected', String(tab.dataset.screen === state.screen)));
+    screens.forEach(screen => { get('mp-' + screen).hidden = state.screen !== screen; });
+    get('mp-global-status').textContent = linkLabels[state.link];
+    get('mp-status-dot').style.background = ready() ? 'var(--mp-accent)' : 'var(--mp-warning)';
+    get('mp-mode-label').textContent = state.mode === 'demo' ? 'DEMO · DATI SIMULATI' : 'ANTEPRIMA · DATI SIMULATI';
+    fuels.forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.fuel === state.fuel));
+      button.disabled = busy();
+    });
+    read.disabled = busy() || !ready();
+    get('mp-export').disabled = busy();
+    readLabel.textContent = state.busy ? 'Lettura in corso…' : 'Leggi parametri disponibili';
+    results.hidden = !state.hasSample;
+    empty.hidden = state.hasSample || state.busy;
+    sampleTime.hidden = !state.hasSample && !state.busy;
+    if (state.busy) sampleTime.textContent = 'Acquisizione del campione simulato in corso…';
+    else if (state.hasSample) {
+      sampleTime.replaceChildren(document.createTextNode('Campione completato alle '));
+      const stamp = document.createElement('strong');
+      stamp.textContent = '14:32:04.120';
+      sampleTime.append(stamp, document.createTextNode(' · ' + state.fuel));
+    }
+    empty.textContent = ready() ? 'Nessun campione per questa annotazione. Premi «Leggi parametri disponibili».' : 'Verifica prima la centralina dalla scheda Collegamento oppure avvia la demo.';
+    renderConnection();
+    renderDiagnosis();
+  }
+
+  function renderConnection() {
+    get('mp-link-badge').textContent = ready() ? 'Pronta' : linkBusy() ? 'In corso' : connected() ? 'Da verificare' : 'Da collegare';
+    get('mp-link-badge').dataset.tone = ready() ? 'acquired' : 'warning';
+    get('mp-adapter-state').textContent = connected() ? 'Collegato' : state.link === 'connecting' ? 'In collegamento' : 'Non collegato';
+    get('mp-adapter-state').className = connected() ? 'mp-good' : 'mp-neutral-text';
+    get('mp-vehicle-state').textContent = ready() ? 'Raggiunta' : state.link === 'probing' ? 'Verifica in corso' : connected() ? 'Non verificata' : 'Da verificare';
+    get('mp-vehicle-state').className = ready() ? 'mp-good' : 'mp-warning-text';
+    get('mp-link-details').hidden = !connected();
+    get('mp-adapter-name').textContent = state.mode === 'demo' ? 'ELM327 DEMO' : 'ELM327 · esempio simulato';
+    get('mp-protocol-name').textContent = state.mode === 'demo' ? 'ISO 9141-2 · SIMULATO' : 'ISO 9141-2 · esempio';
+    get('mp-protocol-row').hidden = !ready();
+    get('mp-supported-count').hidden = !ready();
+    const linkMessage = state.link === 'manual' ? 'L’autoconnessione è sospesa. Un collegamento manuale riuscito la riabilita anche per le prossime aperture.' : state.link === 'adapter' ? 'L’adattatore è collegato, ma la verifica della centralina non è completata.' : '';
+    get('mp-link-message').textContent = linkMessage;
+    get('mp-link-message').hidden = !linkMessage;
+    get('mp-recheck').hidden = state.link !== 'adapter';
+    get('mp-recheck').disabled = busy();
+    get('mp-bluetooth-settings').disabled = busy();
+    get('mp-permission').hidden = state.permission;
+    get('mp-permission').disabled = busy();
+    get('mp-notification').hidden = !state.permission || state.notifications;
+    get('mp-devices').hidden = !state.permission;
+    get('mp-device-choice').disabled = busy() || connected() || state.mode === 'demo';
+    get('mp-refresh-devices').disabled = busy();
+    get('mp-save-device').disabled = busy() || connected() || state.mode === 'demo' || !get('mp-device-choice').checked;
+    get('mp-manual-connect').hidden = state.mode === 'demo' || !state.realSaved || connected();
+    get('mp-manual-connect').disabled = busy();
+    get('mp-demo-isolation').hidden = state.mode !== 'demo';
+    get('mp-mode-switch').textContent = state.mode === 'demo' ? 'Torna al dispositivo reale' : 'Prova con dati simulati';
+    get('mp-mode-switch').disabled = busy() || (state.mode !== 'demo' && connected());
+    get('mp-disconnect').hidden = !busy() && !connected();
+  }
+
+  function renderDiagnosis() {
+    const d = currentDiagnosis();
+    const active = running(d);
+    get('mp-start-diagnosis').hidden = !!active;
+    get('mp-start-diagnosis').disabled = busy() || !ready();
+    get('mp-diagnosis-prerequisite').hidden = ready();
+    get('mp-diagnosis-running').hidden = !active;
+    get('mp-diagnosis-empty').hidden = !!d;
+    get('mp-diagnosis-results').hidden = !d;
+    if (!d) return;
+    get('mp-diagnosis-phase').textContent = d.phase === 'stopping' ? 'Interruzione in corso…' : 'Acquisizione in corso…';
+    get('mp-diagnosis-stage').textContent = stageNames[Math.min(d.completed, 5)];
+    get('mp-interrupt-diagnosis').disabled = d.phase !== 'acquiring';
+    get('mp-diagnosis-outcome').textContent = active ? (d.phase === 'stopping' ? 'Interruzione richiesta' : 'In acquisizione') : d.phase === 'interrupted' ? 'Interrotta' : 'Parziale';
+    get('mp-diagnosis-outcome').dataset.tone = 'warning';
+    get('mp-diagnosis-reason').textContent = active ? 'I risultati vengono aggiunti al termine di ogni richiesta.' : d.phase === 'interrupted' ? (d.reason || 'Acquisizione interrotta.') + (d.completed === 0 ? ' Nessun dato acquisito.' : '') : 'Una o più sezioni hanno dati mancanti o letture non conclusive.';
+    get('mp-diagnosis-id').textContent = 'Diagnosi #' + d.id;
+    get('mp-diagnosis-mode').textContent = d.mode === 'demo' ? 'DEMO · DATI SIMULATI' : 'Sessione reale · rappresentazione simulata';
+    get('mp-diagnosis-fuel').textContent = d.fuel === 'Non annotata' ? d.fuel : d.fuel + ' · annotata manualmente';
+    get('mp-diagnosis-adapter').textContent = d.mode === 'demo' ? 'OBDII · DEMO / ELM327 DEMO' : 'OBDII / ELM327 · esempio simulato';
+    get('mp-diagnosis-protocol').textContent = d.mode === 'demo' ? 'ISO 9141-2 · SIMULATO' : 'ISO 9141-2 · esempio';
+    get('mp-diagnosis-end-row').hidden = !!active;
+    get('mp-diagnosis-end').textContent = '14:32:' + String(10 + d.completed).padStart(2, '0') + ' · durata ' + (d.completed * 1000).toLocaleString('it-IT') + ' ms';
+    root.querySelectorAll('[data-diag-stage]').forEach(panel => {
+      const index = Number(panel.dataset.diagStage);
+      const acquired = index < d.completed;
+      const badge = panel.querySelector('[data-section-status]');
+      if (acquired) {
+        badge.textContent = index === 2 ? 'Nessun codice restituito' : index === 3 ? 'Lettura non conclusiva' : 'Dati acquisiti';
+        badge.dataset.tone = index === 3 ? 'warning' : index === 2 ? 'neutral' : 'acquired';
+      } else {
+        badge.textContent = active && index === d.completed ? (d.phase === 'stopping' ? 'Interruzione in corso' : 'Acquisizione in corso') : d.phase === 'interrupted' && index === d.completed ? 'Interrotta' : 'Non eseguita';
+        badge.dataset.tone = active && index === d.completed ? 'warning' : 'neutral';
+      }
+      panel.querySelector('[data-section-time]').hidden = !acquired;
+      panel.querySelector('[data-section-body]').hidden = !acquired;
+    });
+    get('mp-export-diagnosis').hidden = !!active;
+    get('mp-export-diagnosis').disabled = busy();
+  }
+
+  function advanceDiagnosis(d) {
+    clearTimeout(diagnosisTimer);
+    diagnosisTimer = setTimeout(() => {
+      if (currentDiagnosis() !== d || !running(d)) return;
+      d.completed = Math.min(6, d.completed + 1);
+      if (d.phase === 'stopping') { d.phase = 'interrupted'; d.reason = 'Interruzione richiesta dall’utente.'; }
+      else if (d.completed === 6) d.phase = 'partial';
+      render();
+      if (running(d)) advanceDiagnosis(d); else persist();
+    }, 900);
+  }
+
+  function connect() {
+    if (busy() || !state.permission || state.mode === 'demo') return;
+    state.link = 'connecting'; state.hasSample = false; render();
+    clearTimeout(linkTimer);
+    linkTimer = setTimeout(() => {
+      state.link = 'probing'; render();
+      linkTimer = setTimeout(() => { state.link = 'ready'; render(); persist(); }, 900);
+    }, 900);
+  }
+
+  function disconnect() {
+    clearTimeout(linkTimer); clearTimeout(diagnosisTimer); clearTimeout(readTimer);
+    const d = currentDiagnosis();
+    if (running(d)) { d.phase = 'interrupted'; d.reason = 'Sessione scollegata dall’utente.'; }
+    state.busy = false; state.link = 'stopped'; render(); persist();
+  }
+
+  function chooseMode(mode) {
+    if (busy()) return;
+    state.mode = mode; state.link = mode === 'demo' ? 'ready' : state.realSaved ? 'idle' : 'setup';
+    state.fuel = 'Non annotata'; state.hasSample = false; render(); persist();
+  }
+  tabs.forEach(tab => tab.addEventListener('click', () => { state.screen = tab.dataset.screen; status.textContent = ''; render(); persist(); }));
+  fuels.forEach(button => button.addEventListener('click', () => {
+    if (busy() || state.fuel === button.dataset.fuel) return;
+    state.fuel = button.dataset.fuel; state.hasSample = false; render(); persist();
+  }));
+  read.addEventListener('click', () => {
+    if (busy() || !ready()) return;
+    state.busy = true; state.hasSample = false; render();
+    readTimer = setTimeout(() => { state.busy = false; state.hasSample = true; render(); persist(); }, 650);
+  });
+  root.querySelector('#mp-export').addEventListener('click', () => {
+    status.textContent = 'Comando illustrativo: nell’app apre la scelta della destinazione del rapporto. Questa anteprima non salva rapporti.';
+  });
+  get('mp-export-diagnosis').addEventListener('click', () => { status.textContent = 'Comando illustrativo: nell’app esporta la diagnosi conclusa, con il contesto fissato al suo avvio. Questa anteprima non salva rapporti.'; });
+  get('mp-bluetooth-settings').addEventListener('click', () => { status.textContent = 'Comando illustrativo: nell’app apre le impostazioni Bluetooth del telefono. Il mockup non cambia le impostazioni.'; });
+  get('mp-permission').addEventListener('click', () => { state.permission = true; state.notifications = true; render(); status.textContent = 'Autorizzazioni rappresentate nel mockup. Nessun permesso del telefono è stato modificato.'; });
+  get('mp-notification').addEventListener('click', () => { state.notifications = true; render(); status.textContent = 'Consenso alla notifica rappresentato nel mockup. Nessun permesso del telefono è stato modificato.'; });
+  get('mp-refresh-devices').addEventListener('click', () => { status.textContent = 'Elenco illustrativo: un dispositivo associato chiamato OBDII. Nessuna ricerca Bluetooth viene eseguita.'; });
+  get('mp-device-choice').addEventListener('change', render);
+  get('mp-save-device').addEventListener('click', () => { if (busy() || connected() || state.mode === 'demo') return; state.realSaved = true; connect(); });
+  get('mp-manual-connect').addEventListener('click', connect);
+  get('mp-disconnect').addEventListener('click', disconnect);
+  get('mp-mode-switch').addEventListener('click', () => { chooseMode(state.mode === 'demo' ? 'real' : 'demo'); });
+  get('mp-recheck').addEventListener('click', () => { if (busy()) return; state.link = 'probing'; render(); linkTimer = setTimeout(() => { state.link = 'ready'; render(); }, 900); });
+  get('mp-start-diagnosis').addEventListener('click', () => {
+    if (busy() || !ready()) return;
+    const d = { id: ++state.sequence, phase: 'acquiring', completed: 0, mode: state.mode, fuel: state.fuel, reason: '' };
+    state.diagnoses[state.mode] = d; render(); advanceDiagnosis(d);
+  });
+  get('mp-interrupt-diagnosis').addEventListener('click', () => { const d = currentDiagnosis(); if (!d || d.phase !== 'acquiring') return; d.phase = 'stopping'; render(); });
+  window.addEventListener('openai:set_globals', event => {
+    const incoming = event.detail && event.detail.globals && event.detail.globals.widgetState;
+    const next = incoming && (incoming.modelContent || incoming);
+    if (!next || busy() || next.previewVersion !== 2) return;
+    if (screens.includes(next.screen)) state.screen = next.screen;
+    if (['Benzina', 'Metano', 'Non annotata'].includes(next.fuel)) state.fuel = next.fuel;
+    if (typeof next.hasSample === 'boolean') state.hasSample = next.hasSample;
+    render();
+  });
+  render();
+  if (globalThis.Tweak) {
+    const design = { rowPadding: 12, valueSize: 30 };
+    const tweak = new Tweak({ container: phone, onChange: () => {
+      phone.style.setProperty('--mp-row-pad', design.rowPadding + 'px');
+      phone.style.setProperty('--mp-value-size', design.valueSize + 'px');
+    }});
+    tweak.addSlider(design, 'rowPadding', { label: 'Spazio tra le voci del registro', min: 8, max: 18, unit: 'px' });
+    tweak.addSlider(design, 'valueSize', { label: 'Dimensione dei valori', min: 26, max: 34, unit: 'px' });
+    const connectionView = { state: 'demo' };
+    const connectionTweak = new Tweak({ container: get('mp-connection'), onChange: () => {
+      clearTimeout(linkTimer); clearTimeout(diagnosisTimer); clearTimeout(readTimer);
+      const d = currentDiagnosis();
+      if (running(d)) { d.phase = 'interrupted'; d.reason = 'Collegamento interrotto.'; }
+      state.busy = false; state.mode = connectionView.state === 'demo' ? 'demo' : 'real';
+      state.permission = connectionView.state !== 'permission';
+      state.notifications = connectionView.state !== 'notification';
+      state.realSaved = ['adapter', 'manual', 'notification'].includes(connectionView.state);
+      state.link = connectionView.state === 'demo' ? 'ready' : connectionView.state === 'adapter' ? 'adapter' : connectionView.state === 'manual' ? 'manual' : 'setup';
+      state.hasSample = false; render();
+    }});
+    connectionTweak.addSelect(connectionView, 'state', { label: 'Stato da visualizzare', options: [
+      {label: 'Sessione demo collegata', value: 'demo'}, {label: 'Prima configurazione', value: 'setup'},
+      {label: 'Autorizzazione mancante', value: 'permission'}, {label: 'Notifica non autorizzata', value: 'notification'},
+      {label: 'Verifica centralina non completata', value: 'adapter'}, {label: 'Autoconnessione sospesa', value: 'manual'}
+    ]});
+    const diagnosisView = { state: 'partial' };
+    const diagnosisTweak = new Tweak({ container: get('mp-diagnosis'), onChange: () => {
+      clearTimeout(linkTimer); clearTimeout(diagnosisTimer); clearTimeout(readTimer);
+      state.busy = false; state.mode = 'demo'; state.link = 'ready';
+      state.diagnoses.demo = diagnosisView.state === 'none' ? null : {
+        id: ++state.sequence, phase: diagnosisView.state, completed: diagnosisView.state === 'partial' ? 6 : 3,
+        mode: 'demo', fuel: state.fuel, reason: 'Interruzione richiesta dall’utente.'
+      };
+      render();
+      if (running(currentDiagnosis())) advanceDiagnosis(currentDiagnosis());
+    }});
+    diagnosisTweak.addSelect(diagnosisView, 'state', { label: 'Stato da visualizzare', options: [
+      {label: 'Diagnosi parziale della demo', value: 'partial'}, {label: 'Diagnosi non avviata', value: 'none'},
+      {label: 'Acquisizione in corso', value: 'acquiring'}, {label: 'Interruzione richiesta', value: 'stopping'},
+      {label: 'Diagnosi interrotta', value: 'interrupted'}
+    ]});
+  }
+})();
+</script>

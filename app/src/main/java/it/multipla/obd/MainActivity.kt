@@ -18,34 +18,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScrollableTabRow
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -56,25 +30,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import it.multipla.obd.core.ConnectionPhase
-import it.multipla.obd.core.Parameters
 import it.multipla.obd.core.SavedTarget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
-private data class PairedDevice(val name: String, val address: String)
 
 class MainActivity : ComponentActivity() {
     private var boundService by mutableStateOf<DiagnosticService?>(null)
@@ -115,7 +82,7 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("MissingPermission")
     @Composable
     private fun App() {
-        // Result handlers remain registered while the UI unbinds from the service.
+        // I launcher restano registrati anche quando la schermata si disassocia dal servizio.
         var permissionEpoch by remember { mutableIntStateOf(0) }
         var tab by rememberSaveable { mutableIntStateOf(0) }
         val permissionRequest = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
@@ -146,7 +113,7 @@ class MainActivity : ComponentActivity() {
         }
         val service = boundService
         if (service == null) {
-            MaterialTheme { Text("Avvio Multipla OBD…", modifier = Modifier.padding(32.dp)) }
+            MultiplaTheme { Text(stringResource(R.string.ui_starting), modifier = Modifier.padding(32.dp)) }
             return
         }
         val model = service.session
@@ -208,159 +175,53 @@ class MainActivity : ComponentActivity() {
             onDispose { lifecycle.removeObserver(observer) }
         }
 
-        MaterialTheme(
-            colorScheme = darkColorScheme(
-                primary = Color(0xFF73DEC1),
-                onPrimary = Color(0xFF00382D),
-                background = Color(0xFF0D171A),
-                surface = Color(0xFF152327),
-                surfaceVariant = Color(0xFF213238),
-                onSurface = Color(0xFFE6F1F2),
-            ),
-        ) {
-            Scaffold { insets ->
-                Column(Modifier.fillMaxSize().padding(insets)) {
-                    Column(Modifier.padding(horizontal = 22.dp, vertical = 18.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
-                        Text("MULTIPLA / OBD", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                        Text("2005 · benzina + metano originale", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Box(Modifier.padding(top = 5.dp).size(8.dp).background(if (state.info != null) MaterialTheme.colorScheme.primary else Color(0xFFE9BE73), CircleShape))
-                            Text(state.phase, style = MaterialTheme.typography.bodySmall)
-                        }
-                        if (state.demo) Text("DEMO · DATI SIMULATI", color = Color(0xFFE9BE73), fontWeight = FontWeight.Bold)
-                    }
-                    if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
-                    ScrollableTabRow(selectedTabIndex = tab, edgePadding = 8.dp) {
-                        listOf("Collegamento", "Parametri", stringResource(R.string.diagnosis_tab), "Registro").forEachIndexed { index, label ->
-                            Tab(selected = tab == index, onClick = { tab = index }, text = { Text(label) })
-                        }
-                    }
-                    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                        state.error?.let { InfoCard { Text(it, color = Color(0xFFE9BE73)) } }
-                        when (tab) {
-                            0 -> {
-                                InfoCard {
-                                    Text("La prima connessione", style = MaterialTheme.typography.titleMedium)
-                                    Text("Con l’auto ferma, inserisci l’adattatore e porta il quadro su ON. Seleziona OBDII e salvalo una volta: alle aperture successive il collegamento sarà automatico.")
-                                    Text("La sessione continua passando a un’altra app o spegnendo lo schermo. Puoi interromperla qui o dalla notifica.", style = MaterialTheme.typography.bodySmall)
-                                    OutlinedButton(onClick = { startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS)) }, enabled = !state.busy) { Text("Impostazioni Bluetooth") }
-                                }
-                                if (!permission) {
-                                    Button(onClick = {
-                                        val requested = mutableListOf(Manifest.permission.BLUETOOTH_CONNECT)
-                                        if (Build.VERSION.SDK_INT >= 33) requested += Manifest.permission.POST_NOTIFICATIONS
-                                        permissionRequest.launch(requested.toTypedArray())
-                                    }, enabled = !state.busy) { Text("Autorizza Bluetooth e notifiche") }
-                                } else {
-                                    if (!notifications && Build.VERSION.SDK_INT >= 33) {
-                                        OutlinedButton(onClick = {
-                                            permissionRequest.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS))
-                                        }) { Text("Consenti la notifica della sessione") }
+        MultiplaTheme {
+            DiagnosticScaffold(state, tab, { tab = it }) {
+                when (tab) {
+                    0 -> ConnectionContent(
+                        state = state,
+                        paired = paired,
+                        selected = selected,
+                        permission = permission,
+                        notifications = notifications,
+                        actions = ConnectionActions(
+                            onBluetoothSettings = { startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS)) },
+                            onPermissions = {
+                                val requested = mutableListOf(Manifest.permission.BLUETOOTH_CONNECT)
+                                if (Build.VERSION.SDK_INT >= 33) requested += Manifest.permission.POST_NOTIFICATIONS
+                                permissionRequest.launch(requested.toTypedArray())
+                            },
+                            onNotifications = { if (Build.VERSION.SDK_INT >= 33) permissionRequest.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS)) },
+                            onSelect = { selected = it },
+                            onRefresh = { refresh() },
+                            onSave = {
+                                try {
+                                    if (!hasConnectPermission()) {
+                                        permission = false
+                                        model.message("Autorizzazione Bluetooth necessaria")
+                                    } else {
+                                        val device = paired.firstOrNull { it.address == selected } ?: error("Seleziona un dispositivo associato")
+                                        service.requestSaveFromUi(SavedTarget(device.name, device.address))
                                     }
-                                    Text("Dispositivi già associati", style = MaterialTheme.typography.titleMedium)
-                                    if (paired.isEmpty()) Text("Nessun dispositivo disponibile. Controlla Bluetooth e associazione.")
-                                    paired.forEach { device ->
-                                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                            RadioButton(selected = selected == device.address, onClick = { selected = device.address }, enabled = !state.busy && !state.connected && !state.demo)
-                                            Column(Modifier.padding(top = 10.dp)) {
-                                                Text(device.name, fontWeight = FontWeight.SemiBold)
-                                                Text("ID …${device.address.takeLast(8)}", style = MaterialTheme.typography.bodySmall)
-                                            }
-                                        }
-                                    }
-                                    TextButton(onClick = { refresh() }, enabled = !state.busy) { Text("Aggiorna elenco") }
-                                    Button(enabled = selected.isNotBlank() && !state.busy && !state.connected && !state.demo, onClick = {
-                                        try {
-                                            if (!hasConnectPermission()) {
-                                                permission = false
-                                                model.message("Autorizzazione Bluetooth necessaria")
-                                            } else {
-                                                val device = paired.firstOrNull { it.address == selected } ?: error("Seleziona un dispositivo associato")
-                                                service.requestSaveFromUi(SavedTarget(device.name, device.address))
-                                            }
-                                        } catch (e: Exception) {
-                                            model.message(e.message ?: "Collegamento non riuscito")
-                                        }
-                                    }) { Text("Salva dispositivo OBDII") }
-                                    if (state.connection.target != null && !state.connected && !state.demo) {
-                                        Button(onClick = { service.requestManualFromUi() }, enabled = !state.busy) { Text("Connetti manualmente") }
-                                    }
+                                } catch (e: Exception) {
+                                    model.message(e.message ?: "Collegamento non riuscito")
                                 }
-                                if (state.connected) {
-                                    InfoCard {
-                                        Text("Adattatore collegato", style = MaterialTheme.typography.titleMedium)
-                                        Text(state.connection.adapter.orEmpty())
-                                        state.info?.let { info ->
-                                            Text(info.protocol)
-                                            Text("${info.supported.size} PID rilevati nelle pagine interrogate")
-                                        }
-                                        Text("L’identità della centralina Fiat/metano resta da verificare.", style = MaterialTheme.typography.bodySmall)
-                                        if (state.connection.phase == ConnectionPhase.ADAPTER_READY) OutlinedButton(onClick = { model.recheckVehicle() }) { Text("Riprova verifica centralina") }
-                                    }
-                                }
-                                state.connection.detail?.let { Text(it, color = Color(0xFFE9BE73)) }
-                                if (state.connection.phase == ConnectionPhase.MANUAL_REQUIRED) Text("L’autoconnessione è sospesa. Premi Connetti manualmente: un collegamento riuscito la riabilita anche per le prossime aperture.")
-                                if (!state.demo) {
-                                    OutlinedButton(onClick = { service.requestDemoFromUi() }, enabled = !state.busy && !state.connected) { Text("Prova con dati simulati") }
-                                } else {
-                                    OutlinedButton(onClick = { service.requestExitDemoFromUi() }, enabled = !state.busy) { Text("Torna al dispositivo reale") }
-                                }
-                                if (state.busy || state.connected) OutlinedButton(onClick = { model.disconnect() }) { Text("Scollega / annulla") }
-                                Text("Versione 0.3.2 · ADR-0001 / ADR-0002 · letture diagnostiche", style = MaterialTheme.typography.bodySmall)
-                            }
+                            },
+                            onManualConnect = { service.requestManualFromUi() },
+                            onRecheckVehicle = model::recheckVehicle,
+                            onDemo = { service.requestDemoFromUi() },
+                            onExitDemo = { service.requestExitDemoFromUi() },
+                            onDisconnect = model::disconnect,
+                        ),
+                    )
 
-                            1 -> {
-                                Text("Un campione del motore", style = MaterialTheme.typography.titleLarge)
-                                Text("Annota l’alimentazione attuale prima della lettura. L’app non la rileva automaticamente.")
-                                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                    listOf("Benzina", "Metano").forEach { fuel ->
-                                        FilterChip(selected = state.fuel == fuel, onClick = { model.fuel(fuel) }, label = { Text(fuel) }, enabled = !state.busy)
-                                    }
-                                }
-                                Button(onClick = { model.readSnapshot() }, enabled = state.info != null && !state.busy) { Text("Leggi parametri disponibili") }
-                                if (state.info == null) Text("Verifica prima la centralina dalla scheda Collegamento oppure avvia la demo.")
-                                state.sampleTime?.let { Text("Campione completato alle $it · ${state.fuel}", style = MaterialTheme.typography.bodySmall) }
-                                state.engine?.let { engine ->
-                                    InfoCard {
-                                        Text("Spia motore: ${if (engine.mil) "richiesta accesa dalla ECU" else "non richiesta dalla ECU"}")
-                                        Text("Errori confermati dichiarati: ${engine.confirmedCount}")
-                                    }
-                                }
-                                state.readings.forEach { reading ->
-                                    InfoCard {
-                                        Text(reading.label, style = MaterialTheme.typography.bodyMedium)
-                                        Text(reading.display, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
-                                    }
-                                }
-                                state.problems.forEach { Text(it, color = Color(0xFFE9BE73)) }
-                                state.info?.let { info ->
-                                    val unavailable = Parameters.all.filter { it.pid !in info.supported }
-                                    if (unavailable.isNotEmpty()) Text("Non dichiarati disponibili: " + unavailable.joinToString { it.label }, style = MaterialTheme.typography.bodySmall)
-                                }
-                                Text("Le letture sono sequenziali. Esporta il rapporto per conservare il campione prima di leggerne un altro.", style = MaterialTheme.typography.bodySmall)
-                            }
+                    1 -> ParametersContent(state, model::readSnapshot, model::fuel)
 
-                            2 -> DiagnosisContent(state, model::startDiagnosis, model::interruptDiagnosis, model::fuel) { model.exportDiagnosis()?.let(::exportReport) }
+                    2 -> DiagnosisContent(state, model::startDiagnosis, model::interruptDiagnosis, model::fuel) { model.exportDiagnosis()?.let(::exportReport) }
 
-                            else -> {
-                                Text("Registro della sessione", style = MaterialTheme.typography.titleLarge)
-                                Text("Ultime 400 voci. Include richieste, risposte e problemi di comunicazione.")
-                                OutlinedButton(onClick = { exportReport(model.exportText()) }, enabled = !state.busy && state.logs.isNotEmpty()) { Text(stringResource(R.string.report_export)) }
-                                state.logs.takeLast(120).forEach { Text(it, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall) }
-                                if (state.logs.isEmpty()) Text("Avvia una sessione per registrare gli scambi.")
-                            }
-                        }
-                        Spacer(Modifier.height(12.dp))
-                    }
+                    else -> SessionRegisterContent(state) { exportReport(model.exportText()) }
                 }
             }
         }
-    }
-}
-
-@Composable
-internal fun InfoCard(content: @Composable () -> Unit) {
-    Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { content() }
     }
 }

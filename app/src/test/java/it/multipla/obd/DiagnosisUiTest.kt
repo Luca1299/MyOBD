@@ -10,6 +10,10 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import it.multipla.obd.core.DiagnosticSection
+import it.multipla.obd.core.DtcKind
+import it.multipla.obd.core.SectionState
+import it.multipla.obd.core.TroubleCode
 import it.multipla.obd.core.VehicleInfo
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -55,7 +59,7 @@ class DiagnosisUiTest {
         compose.onNodeWithText("Benzina").assertIsNotEnabled()
         compose.onNodeWithText("Interrompi diagnosi").performClick()
         assertEquals(1, interruptions)
-        compose.onNodeWithText("Esporta rapporto .txt").assertDoesNotExist()
+        compose.onNodeWithText("Esporta rapporto della diagnosi .txt").assertDoesNotExist()
     }
 
     @Test fun `pending interruption disables action and explains the wait`() {
@@ -70,7 +74,29 @@ class DiagnosisUiTest {
         show(DiagnosticState(demo = true, diagnosis = d))
         compose.onNodeWithText("Parziale").assertExists()
         compose.onNodeWithText("Risposta incompleta").assertExists()
-        compose.onNodeWithText("Esporta rapporto .txt").performScrollTo().performClick()
+        compose.onNodeWithText("Esporta rapporto della diagnosi .txt").performScrollTo().performClick()
         assertEquals(1, exports)
+    }
+
+    @Test fun `empty code category has an explanation distinct from an inconclusive reading`() {
+        val codes = DtcKind.entries.associateWith { kind ->
+            when (kind) {
+                DtcKind.PENDING -> DiagnosticSection<List<TroubleCode>>(state = SectionState.EMPTY, value = emptyList())
+                DtcKind.PERMANENT -> DiagnosticSection(state = SectionState.INCONCLUSIVE, problems = listOf("Nessun dato ricevuto"))
+                else -> DiagnosticSection()
+            }
+        }
+        val diagnosis = Diagnosis(
+            1,
+            DiagnosisContext(true, "OBDII", "ELM", "ISO", "Metano", Instant.EPOCH),
+            phase = DiagnosisPhase.ENDED,
+            outcome = DiagnosisOutcome.PARTIAL,
+            endedAt = Instant.EPOCH,
+            codes = codes,
+        )
+        show(DiagnosticState(demo = true, diagnosis = diagnosis))
+        compose.onNodeWithText("Nessun codice restituito").assertExists()
+        compose.onNodeWithText("Lettura non conclusiva").assertExists()
+        compose.onNodeWithText("Nessun dato ricevuto").assertExists()
     }
 }

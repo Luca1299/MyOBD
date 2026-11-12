@@ -108,6 +108,12 @@ e quando cambia lo stato o il perimetro autorevole.
   del processo anche dopo l’arresto del servizio, secondo ADR-0004. Le evidenze di implementazione e le prove hardware sono distinte
   dalla conferma della specifica.
 
+  Revisione visiva R1 confermata il 12 novembre 2026, con `APPROVO` al
+  consolidamento e incarico distinto di implementazione: adozione del mockup
+  delle quattro schede esistenti, registro in tabella e parametri in griglia,
+  mantenendo i comportamenti attuali. Riferimento e scenari di presentazione
+  sono nel package; la conferma non estende il perimetro di `app/D-0002`.
+
 - [app/D-0002 — Parametri motore in tempo reale](app/D-0002-parametri-motore-in-tempo-reale/README.md)
   — `in design`, consolidamento parziale autorizzato il 12 novembre 2026:
   osservazione dei parametri selezionati e dichiarati disponibili,

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="parameters_sample_title">Un campione del motore</string>
+    <string name="parameters_sample_help">Lettura singola. I valori vengono acquisiti in sequenza.</string>
+    <string name="parameters_fuel_annotation">Alimentazione annotata manualmente</string>
+    <string name="parameters_read">Leggi parametri disponibili</string>
+    <string name="parameters_prerequisite">Verifica prima la centralina dalla scheda Collegamento oppure avvia la demo.</string>
+    <string name="parameters_sample_time">Campione completato alle %1$s · %2$s</string>
+    <string name="parameters_empty">Nessun campione acquisito.</string>
+    <string name="parameters_lamp_title">Spia motore</string>
+    <string name="parameters_lamp_on">Richiesta accesa dalla centralina</string>
+    <string name="parameters_lamp_off">Non richiesta dalla centralina</string>
+    <string name="parameters_problems_title">Problemi di lettura</string>
+    <string name="parameters_corrections_title">Correzioni di carburazione · banco 1</string>
+    <string name="parameters_sample_retention">L’app non rileva automaticamente l’alimentazione. Per conservare il campione, esporta il rapporto dal Registro prima di una nuova lettura.</string>
+    <string name="register_title">Registro della sessione</string>
+    <string name="register_help">Richieste, risposte ed eventi del collegamento, in ordine di acquisizione.</string>
+    <string name="register_export">Esporta rapporto della sessione .txt</string>
+    <string name="register_capacity">Fino a 120 voci a schermo · fino a 400 nel rapporto</string>
+    <string name="register_empty">Avvia una sessione per visualizzare gli scambi.</string>
+    <string name="register_report_help">Orari riferiti al telefono. Il rapporto contiene il contesto della sessione, i dati raccolti e gli scambi conservati.</string>
+    <string name="register_time_column">Ora</string>
+    <string name="register_type_column">Tipo</string>
+    <string name="register_content_column">Contenuto</string>
+    <string name="register_unknown_time">Non disponibile</string>
+    <string name="register_type_request">Richiesta inviata</string>
+    <string name="register_type_response">Risposta ricevuta</string>
+    <string name="register_type_error">Errore di comunicazione</string>
+    <string name="register_type_state">Stato del collegamento</string>
+    <string name="register_type_note">Nota della sessione</string>
+    <string name="register_type_sample">Campione acquisito</string>
+    <string name="register_type_event">Evento della sessione</string>
+</resources>

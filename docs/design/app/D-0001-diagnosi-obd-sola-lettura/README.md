@@ -2,6 +2,11 @@
 
 **Stato:** confermato **Area:** app **Data:** 2026-11-10
 
+**Revisione visiva R1:** confermata il 12 novembre 2026 per le quattro schede
+esistenti, con incarico esplicito di implementazione. Il proprietario ha
+autorizzato distintamente il consolidamento con `APPROVO`, la conferma della
+revisione e il coding. Il perimetro funzionale confermato resta quello attuale.
+
 OBD significa On-Board Diagnostics; DTC significa Diagnostic Trouble Code,
 codice diagnostico di guasto. Architecture Decision Record (ADR) indica il
 registro delle motivazioni; Behavior-Driven Development (BDD) indica gli
@@ -19,6 +24,7 @@ scenari eseguibili di comportamento. TXT indica il formato di testo semplice.
 - [Freeze frame](../../../../obd-core/src/test/resources/features/diagnostics/freeze-frame.feature).
 - [Sessione di diagnosi](../../../../app/src/test/resources/features/diagnostics/diagnosis-session.feature).
 - [Rapporto esportato](../../../../app/src/test/resources/features/diagnostics/diagnosis-report.feature).
+- [Presentazione delle quattro schede](../../../../app/src/test/resources/features/presentation/diagnostic-interface.feature).
 
 Il proprietario ha autorizzato il consolidamento di questa specifica e degli
 scenari con `approvo` il 10 novembre 2026. Conferma separata per il coding
@@ -301,8 +307,84 @@ componenti visivi.
 Usare testi italiani nelle risorse secondo la guida di stile. Colori e icone
 possono accompagnare gli stati, ma non sostituiscono etichette comprensibili.
 Mantenere leggibilità con caratteri ingranditi, scorrimento e azioni raggiungibili,
-nomi accessibili e stato riconoscibile dei controlli disabilitati. Non esiste
-un prototipo visivo vincolante per questo taglio.
+nomi accessibili e stato riconoscibile dei controlli disabilitati.
+
+### Revisione visiva R1 delle schermate esistenti
+
+Il riferimento grafico è [interfaccia-r1.html](mockup/interfaccia-r1.html),
+copia identificata del mockup esaminato e confermato dal proprietario nella
+sessione del 12 novembre 2026. Impronta SHA-256 (Secure Hash Algorithm a
+256 bit): `7b3ad6fe2695c13256e11cdcb8d363ce2d36e407019c5f21da8eaca85fa8f60f`.
+È un frammento di anteprima: dati, dispositivi, orari, azioni simulate e
+controlli di esplorazione non costituiscono requisiti applicativi. Questa
+sezione definisce il contratto; la resa Android riusa Compose e Material.
+
+La revisione riguarda presentazione e testi di Collegamento, Parametri,
+Diagnosi e Registro. Mantiene le quattro schede nello stesso ordine,
+il tema scuro con accento verde acqua, l'intestazione della vettura, lo stato
+testuale del collegamento e l'identificazione esplicita della demo. Non
+introduce nuove politiche di connessione, comandi diagnostici, conservazione,
+esportazioni o funzionalità del package `app/D-0002` ancora in design.
+
+Componenti da riusare: tema Material, schede di navigazione, card, pulsanti,
+selettori di alimentazione e indicatore di attività. I componenti comuni di
+presentazione espongono titoli, coppie etichetta/valore, esiti testuali e
+parametri; osservano lo stato esistente e ricevono azioni, senza possedere
+una sessione o avviare effetti alla composizione. I decoder e i rapporti
+esistenti conservano i propri contratti.
+
+| Schermata | Presentazione confermata |
+| --- | --- |
+| Collegamento | Stato dell'adattatore distinto dalla verifica della centralina; dettagli disponibili, istruzioni iniziali, impostazioni e permessi, dispositivi associati, salvataggio, aggiornamento, collegamento manuale, ripetizione della verifica, ingresso/uscita demo e Scollega/annulla. Restano le condizioni di disponibilità e i recuperi già implementati e descritti in ADR-0001 e ADR-0002. |
+| Parametri | Titolo «Un campione del motore», annotazione manuale e comando «Leggi parametri disponibili». Griglia a due colonne per valori brevi, etichette e unità visibili; correzioni di carburazione su righe intere. Un'eventuale ultima tessera dispari può occupare l'intera riga. Restano spia, conteggio dichiarato, orario, problemi e parametri non disponibili. La lettura è singola e sequenziale. |
+| Diagnosi | Contesto e avvio, fase e interruzione, riepilogo, categorie dei codici separate, spia e controlli antinquinamento, dati del guasto con il termine freeze frame, parametri attuali e rapporto concluso. Esiti e limiti restano testuali e locali a ogni sezione. Fonte e versione della descrizione rimangono consultabili mediante un'espansione esplicita. |
+| Registro | Colonne «Ora», «Tipo» e «Contenuto», righe separate e messaggi originali monospaziati. I prefissi noti sono spiegati da etichette italiane; i testi originali restano recuperabili senza alterazione dei contenuti. L'esportazione conserva il rapporto corrente completo, non soltanto la tabella mostrata. |
+
+Nel Registro, TX indica richiesta inviata, RX risposta ricevuta, ERR errore
+di comunicazione; STATO, NOTA e CAMPIONE identificano rispettivamente stato
+del collegamento, nota della sessione e campione acquisito. Un prefisso non
+riconosciuto rimane un evento della sessione con contenuto originale; una
+riga senza orario riconoscibile resta leggibile integralmente, senza inventare
+un orario. I messaggi multilinea conservano righe e contenuto. La
+presentazione mantiene ordine e ultime 120 voci; memoria ed esportazione
+conservano fino a 400 voci secondo il contratto esistente. Il testo chiarisce
+«Fino a 120 voci a schermo · fino a 400 nel rapporto».
+
+I due ingressi all'esportazione sono distinguibili: «Esporta rapporto della
+sessione .txt» nel Registro e «Esporta rapporto della diagnosi .txt» nella
+Diagnosi. Restano invariati contenuti, prerequisiti e selettore documenti.
+Lo stato vuoto del Registro invita ad avviare una sessione. La mancanza di
+un campione, di un risultato o di un prerequisito ha il proprio testo, senza
+valori dimostrativi nell'interfaccia reale.
+
+Tutti gli stati esistenti restano rappresentabili: prima configurazione,
+permessi o notifiche mancanti, elenco vuoto, collegamento e verifica in
+corso, adattatore pronto senza centralina verificata, attesa o necessità di
+collegamento manuale, errori e perdita del collegamento; letture pronte,
+attive e concluse, interruzione richiesta, esiti parziali o interrotti e
+risultati conservati. Il comando di interruzione della diagnosi rimane
+distinto da Scollega. Cambiare scheda non avvia acquisizioni.
+
+Le unità, gli zeri validi, la precisione fornita dai lettori e i valori
+mancanti restano riconoscibili. Il colore evidenzia categorie e stati, senza
+assegnare soglie di normalità o giudizi di salute ai parametri. Il contesto
+della diagnosi conclusa resta separato dalla preparazione di una successiva.
+
+La resa deve adattarsi ad almeno 320 density-independent pixel (dp) di
+larghezza e ai caratteri ingranditi.
+Le griglie passano a una colonna e le righe si ricompongono quando necessario;
+non si tagliano numeri, unità, testi essenziali o azioni. Gli orari del
+Registro possono separare secondi e millisecondi su due righe. Mantenere
+scorrimento verticale, nomi accessibili, selezione riconoscibile delle schede,
+azioni raggiungibili e motivi dei prerequisiti mancanti. La fedeltà grafica
+si verifica separatamente dal comportamento su dati e sessione.
+
+Le verifiche aggiungono gli scenari di presentazione e i test dei componenti
+reali: classificazione e integrità del registro, limite di visualizzazione,
+parametri e unità, distinzione adattatore/centralina, esiti diagnostici e
+navigazione senza azioni implicite. Restano valide tutte le verifiche
+comportamentali già confermate. I risultati della nuova esecuzione saranno
+registrati in `docs/verification/`; il mockup non certifica la resa sul telefono.
 
 ## Criteri di accettazione e copertura
 

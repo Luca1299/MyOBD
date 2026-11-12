@@ -18,10 +18,6 @@
     <string name="diagnosis_not_started">Diagnosi non avviata</string>
     <string name="diagnosis_no_data">Nessun dato acquisito</string>
     <string name="diagnosis_summary">Riepilogo dell’acquisizione</string>
-    <string name="diagnosis_context">Diagnosi #%1$d · alimentazione annotata: %2$s</string>
-    <string name="diagnosis_adapter">Adattatore: %1$s · %2$s\nProtocollo: %3$s</string>
-    <string name="diagnosis_started">Inizio: %1$s</string>
-    <string name="diagnosis_ended">Fine: %1$s · durata: %2$d ms</string>
     <string name="diagnosis_sequential">Orari del telefono. Le letture sono sequenziali, non una fotografia simultanea della vettura.</string>
     <string name="outcome_completed">Completata</string>
     <string name="outcome_partial">Parziale</string>
@@ -38,12 +34,11 @@
     <string name="description_unavailable">Descrizione non disponibile</string>
     <string name="description_source">Fonte: %1$s\nVersione: %2$s</string>
     <string name="diagnosis_provenance">Centralina di origine non identificata. Nessuna attribuzione alla gestione benzina o metano.</string>
-    <string name="readiness_title">Spia e readiness</string>
+    <string name="readiness_title">Spia e controlli antinquinamento</string>
     <string name="readiness_scope">Monitor antinquinamento dall’ultima cancellazione dei codici</string>
     <string name="lamp_on">Spia motore: richiesta accesa dalla centralina</string>
     <string name="lamp_off">Spia motore: non richiesta dalla centralina</string>
     <string name="confirmed_count">Codici confermati dichiarati: %1$d</string>
-    <string name="monitor_status">%1$s: %2$s</string>
     <string name="monitor_completed">Completato</string>
     <string name="monitor_incomplete">Incompleto</string>
     <string name="monitor_unsupported">Non supportato</string>
@@ -62,14 +57,13 @@
     <string name="monitor_boost">Sovralimentazione</string>
     <string name="monitor_exhaust_sensor">Sensore gas di scarico</string>
     <string name="monitor_particulate">Filtro antiparticolato</string>
-    <string name="freeze_title">Freeze frame</string>
+    <string name="freeze_title">Dati del guasto · freeze frame</string>
     <string name="freeze_code">Codice restituito per il frame: %1$s</string>
     <string name="freeze_provenance">Frame 00. Associazione fra risposte, codice e centralina non verificata: i valori restano separati e non garantiscono un unico frame coerente.</string>
     <string name="freeze_time">Data e ora del guasto non disponibili. L’ora della lettura non è l’ora del guasto.</string>
     <string name="current_title">Parametri attuali</string>
-    <string name="measurement">%1$s: %2$s</string>
     <string name="parameters_unavailable">Non dichiarati disponibili in questo contesto: %1$s</string>
     <string name="diagnosis_interpretation">Il completamento non certifica la salute della vettura né l’esito della revisione. Le descrizioni indicano condizioni rilevate, senza individuare cause esatte o riparazioni.</string>
     <string name="diagnosis_retention">Una nuova diagnosi sostituisce il tentativo precedente. Esporta il rapporto per conservarlo oltre la sessione.</string>
-    <string name="report_export">Esporta rapporto .txt</string>
+    <string name="report_export">Esporta rapporto della diagnosi .txt</string>
 </resources>

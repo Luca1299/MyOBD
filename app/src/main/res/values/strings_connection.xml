@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connection_title">Collegamento</string>
+    <string name="connection_explanation">Adattatore e centralina sono due passaggi distinti del collegamento.</string>
+    <string name="connection_session_status">Stato della sessione</string>
+    <string name="connection_adapter_label">Adattatore</string>
+    <string name="connection_vehicle_label">Centralina OBD</string>
+    <string name="connection_identification">Identificazione</string>
+    <string name="connection_protocol">Protocollo</string>
+    <string name="connection_ready">Pronta</string>
+    <string name="connection_verification_needed">Da verificare</string>
+    <string name="connection_in_progress">In corso</string>
+    <string name="connection_waiting">In attesa</string>
+    <string name="connection_needed">Da collegare</string>
+    <string name="connection_adapter_connected">Collegato</string>
+    <string name="connection_adapter_connecting">In collegamento</string>
+    <string name="connection_adapter_disconnected">Non collegato</string>
+    <string name="connection_vehicle_reached">Raggiunta</string>
+    <string name="connection_vehicle_verifying">Verifica in corso</string>
+    <string name="connection_vehicle_unverified">Non verificata</string>
+    <string name="connection_vehicle_pending">Da verificare</string>
+    <plurals name="connection_supported_parameters">
+        <item quantity="one">%1$d identificatore di parametro (PID) rilevato nelle pagine interrogate.</item>
+        <item quantity="other">%1$d identificatori di parametro (PID) rilevati nelle pagine interrogate.</item>
+    </plurals>
+    <string name="connection_vehicle_identity_limit">L’identità della centralina Fiat/metano resta da verificare.</string>
+    <string name="connection_recheck">Riprova verifica centralina</string>
+    <string name="connection_first_title">La prima connessione</string>
+    <string name="connection_first_steps">1. Con l’auto ferma, inserisci l’adattatore e porta il quadro su ON.\n2. Associa OBDII nelle impostazioni Bluetooth del telefono.\n3. Seleziona OBDII e salvalo una volta nell’app.</string>
+    <string name="connection_automatic_help">Alle aperture successive il collegamento sarà automatico.</string>
+    <string name="connection_bluetooth_settings">Impostazioni Bluetooth</string>
+    <string name="connection_request_permissions">Autorizza Bluetooth e notifiche</string>
+    <string name="connection_request_notifications">Consenti la notifica della sessione</string>
+    <string name="connection_paired_devices">Dispositivi già associati</string>
+    <string name="connection_empty_devices">Nessun dispositivo disponibile. Controlla Bluetooth e associazione.</string>
+    <string name="connection_device_id">ID …%1$s</string>
+    <string name="connection_refresh_devices">Aggiorna elenco</string>
+    <string name="connection_save_device">Salva dispositivo OBDII</string>
+    <string name="connection_manual_connect">Connetti manualmente</string>
+    <string name="connection_manual_help">L’autoconnessione è sospesa. Premi Connetti manualmente: un collegamento riuscito la riabilita anche per le prossime aperture.</string>
+    <string name="connection_enter_demo">Prova con dati simulati</string>
+    <string name="connection_exit_demo">Torna al dispositivo reale</string>
+    <string name="connection_disconnect">Scollega / annulla</string>
+    <string name="connection_demo_isolation">La demo non modifica il profilo del dispositivo reale.</string>
+    <string name="connection_continuity">La sessione continua passando a un’altra app o spegnendo lo schermo. Puoi interromperla qui o dalla notifica.</string>
+    <string name="connection_version">Versione 0.3.2 · letture diagnostiche</string>
+</resources>

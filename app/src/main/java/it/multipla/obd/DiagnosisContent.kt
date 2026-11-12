@@ -1,15 +1,23 @@
 package it.multipla.obd
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import it.multipla.obd.core.DiagnosticSection
 import it.multipla.obd.core.DtcKind
@@ -17,100 +25,120 @@ import it.multipla.obd.core.MonitorId
 import it.multipla.obd.core.MonitorState
 import it.multipla.obd.core.Parameters
 import it.multipla.obd.core.SectionState
+import it.multipla.obd.core.TroubleCode
 
-/** Presentazione della sessione esistente: non avvia effetti o connessioni. */
+/** Presenta risultati e azioni della sessione esistente, senza avviare effetti propri. */
 @Composable
 internal fun DiagnosisContent(state: DiagnosticState, onStart: () -> Unit, onInterrupt: () -> Unit, onFuel: (String) -> Unit, onExport: () -> Unit) {
     val diagnosis = state.diagnosis
     val running = diagnosis != null && diagnosis.phase != DiagnosisPhase.ENDED
-    Text(stringResource(R.string.diagnosis_title), style = MaterialTheme.typography.titleLarge)
-    Text(stringResource(if (state.demo) R.string.diagnosis_demo else R.string.diagnosis_real))
-    Text(stringResource(R.string.diagnosis_scope))
-    Text(stringResource(R.string.fuel_annotation))
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+    Text(stringResource(R.string.diagnosis_title), style = MaterialTheme.typography.headlineSmall)
+    Text(stringResource(if (state.demo) R.string.diagnosis_demo else R.string.diagnosis_real), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(stringResource(R.string.diagnosis_scope), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(stringResource(R.string.fuel_annotation), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf(R.string.fuel_unannotated, R.string.fuel_gasoline, R.string.fuel_methane).forEach { resource ->
             val fuel = stringResource(resource)
             FilterChip(selected = state.fuel == fuel, onClick = { onFuel(fuel) }, label = { Text(fuel) }, enabled = !state.busy)
         }
     }
     if (running) {
-        Text(stringResource(if (diagnosis.phase == DiagnosisPhase.STOPPING) R.string.diagnosis_stopping else R.string.diagnosis_acquiring))
-        Text(stringResource(diagnosis.stage.resource))
-        OutlinedButton(onClick = onInterrupt, enabled = diagnosis.phase == DiagnosisPhase.ACQUIRING) { Text(stringResource(R.string.diagnosis_interrupt)) }
-        Text(stringResource(R.string.diagnosis_stop_help))
+        InfoCard {
+            Text(stringResource(if (diagnosis.phase == DiagnosisPhase.STOPPING) R.string.diagnosis_stopping else R.string.diagnosis_acquiring), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(diagnosis.stage.resource))
+            OutlinedButton(shape = actionShape, onClick = onInterrupt, enabled = diagnosis.phase == DiagnosisPhase.ACQUIRING) { Text(stringResource(R.string.diagnosis_interrupt)) }
+            Text(stringResource(R.string.diagnosis_stop_help), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     } else {
-        Button(onClick = onStart, enabled = state.info != null && !state.busy) { Text(stringResource(R.string.diagnosis_start)) }
-        if (state.info == null) Text(stringResource(R.string.diagnosis_prerequisite))
+        Button(shape = actionShape, onClick = onStart, enabled = state.info != null && !state.busy, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.diagnosis_start)) }
+        if (state.info == null) Text(stringResource(R.string.diagnosis_prerequisite), style = MaterialTheme.typography.bodySmall)
     }
     if (diagnosis == null) {
-        Text(stringResource(R.string.diagnosis_not_started))
+        Text(stringResource(R.string.diagnosis_not_started), color = MaterialTheme.colorScheme.onSurfaceVariant)
         return
     }
     InfoCard {
-        Text(stringResource(R.string.diagnosis_summary), style = MaterialTheme.typography.titleMedium)
-        diagnosis.outcome?.let { Text(stringResource(it.resource)) }
+        FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.diagnosis_summary), style = MaterialTheme.typography.titleMedium)
+            diagnosis.outcome?.let { StatusBadge(stringResource(it.resource), warning = it != DiagnosisOutcome.COMPLETED) }
+        }
         if (!running && !diagnosis.hasAcquiredData) Text(stringResource(R.string.diagnosis_no_data))
-        Text(stringResource(R.string.diagnosis_context, diagnosis.id, diagnosis.context.fuel))
-        Text(stringResource(if (diagnosis.context.demo) R.string.diagnosis_demo else R.string.diagnosis_real))
-        Text(stringResource(R.string.diagnosis_adapter, diagnosis.context.adapterName, diagnosis.context.adapter, diagnosis.context.protocol))
-        Text(stringResource(R.string.diagnosis_started, diagnosis.context.startedAt.toString()))
-        diagnosis.endedAt?.let { Text(stringResource(R.string.diagnosis_ended, it.toString(), diagnosis.duration?.toMillis() ?: 0)) }
-        diagnosis.reason?.let { Text(it) }
-        Text(stringResource(R.string.diagnosis_sequential), style = MaterialTheme.typography.bodySmall)
+        diagnosis.reason?.let { Text(it, color = warningColor) }
+        LabelValueRow(stringResource(R.string.ui_context_attempt), stringResource(R.string.ui_context_attempt_value, diagnosis.id))
+        LabelValueRow(stringResource(R.string.ui_context_mode), stringResource(if (diagnosis.context.demo) R.string.diagnosis_demo else R.string.diagnosis_real))
+        LabelValueRow(stringResource(R.string.ui_context_fuel), diagnosis.context.fuel)
+        LabelValueRow(stringResource(R.string.ui_context_adapter), diagnosis.context.adapterName + " · " + diagnosis.context.adapter)
+        LabelValueRow(stringResource(R.string.ui_context_protocol), diagnosis.context.protocol)
+        LabelValueRow(stringResource(R.string.ui_context_started), acquisitionTime(diagnosis.context.startedAt))
+        diagnosis.endedAt?.let { LabelValueRow(stringResource(R.string.ui_context_ended), stringResource(R.string.ui_context_ended_value, acquisitionTime(it), diagnosis.duration?.toMillis() ?: 0)) }
+        Text(stringResource(R.string.diagnosis_sequential), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
     DtcKind.entries.forEach { kind ->
         val codes = diagnosis.codes.getValue(kind)
-        DiagnosticSectionCard(stringResource(kind.resource), codes) {
+        DiagnosticSectionCard(stringResource(kind.resource), codes, R.string.ui_codes_empty) {
             codes.value.orEmpty().forEach { code ->
-                Text(code.code, style = MaterialTheme.typography.titleMedium)
+                Text(code.code, style = MaterialTheme.typography.headlineSmall, color = warningColor)
                 Text(code.description ?: stringResource(R.string.description_unavailable))
-                code.source?.let { Text(stringResource(R.string.description_source, it, code.version.orEmpty()), style = MaterialTheme.typography.bodySmall) }
+                code.source?.let { DescriptionDetails(code) }
             }
         }
     }
-    Text(stringResource(R.string.diagnosis_provenance), style = MaterialTheme.typography.bodySmall)
+    Text(stringResource(R.string.diagnosis_provenance), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     DiagnosticSectionCard(stringResource(R.string.readiness_title), diagnosis.readiness) {
-        Text(stringResource(R.string.readiness_scope))
+        Text(stringResource(R.string.readiness_scope), style = MaterialTheme.typography.bodySmall)
         diagnosis.readiness.value?.let { readiness ->
-            Text(stringResource(if (readiness.engine.mil) R.string.lamp_on else R.string.lamp_off))
+            Text(stringResource(if (readiness.engine.mil) R.string.lamp_on else R.string.lamp_off), color = if (readiness.engine.mil) warningColor else MaterialTheme.colorScheme.onSurface)
             Text(stringResource(R.string.confirmed_count, readiness.engine.confirmedCount))
-            readiness.monitors.forEach { monitor -> Text(stringResource(R.string.monitor_status, stringResource(monitor.id.resource), stringResource(monitor.state.resource))) }
+            readiness.monitors.forEach { monitor -> LabelValueRow(stringResource(monitor.id.resource), stringResource(monitor.state.resource)) }
         }
     }
-    DiagnosticSectionCard(stringResource(R.string.freeze_title), diagnosis.freezeFrame) {
+    DiagnosticSectionCard(stringResource(R.string.freeze_title), diagnosis.freezeFrame, R.string.ui_frame_empty) {
         diagnosis.freezeFrame.value?.let { frame ->
             frame.code?.let { Text(stringResource(R.string.freeze_code, it)) }
-            frame.readings.forEach { Text(stringResource(R.string.measurement, it.label, it.display)) }
-            Text(stringResource(R.string.freeze_provenance))
-            Text(stringResource(R.string.freeze_time))
+            ParameterReadings(frame.readings)
+            Text(stringResource(R.string.freeze_provenance), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.freeze_time), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             val unavailable = Parameters.all.filter { it.pid !in frame.supported }
-            if (frame.supported.isNotEmpty() && unavailable.isNotEmpty()) Text(stringResource(R.string.parameters_unavailable, unavailable.joinToString { it.label }))
+            if (frame.supported.isNotEmpty() && unavailable.isNotEmpty()) Text(stringResource(R.string.parameters_unavailable, unavailable.joinToString { it.label }), style = MaterialTheme.typography.bodySmall)
         }
     }
     DiagnosticSectionCard(stringResource(R.string.current_title), diagnosis.parameters) {
         diagnosis.parameters.value?.let { sample ->
-            sample.readings.forEach { Text(stringResource(R.string.measurement, it.label, it.display)) }
+            ParameterReadings(sample.readings)
             val unavailable = Parameters.all.filter { it.pid in sample.unsupportedPids }
-            if (unavailable.isNotEmpty()) Text(stringResource(R.string.parameters_unavailable, unavailable.joinToString { it.label }))
+            if (unavailable.isNotEmpty()) Text(stringResource(R.string.parameters_unavailable, unavailable.joinToString { it.label }), style = MaterialTheme.typography.bodySmall)
         }
     }
-    Text(stringResource(R.string.diagnosis_interpretation), style = MaterialTheme.typography.bodySmall)
-    Text(stringResource(R.string.diagnosis_retention), style = MaterialTheme.typography.bodySmall)
-    if (!running) OutlinedButton(onClick = onExport, enabled = !state.busy) { Text(stringResource(R.string.report_export)) }
+    Text(stringResource(R.string.diagnosis_interpretation), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(stringResource(R.string.diagnosis_retention), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    if (!running) OutlinedButton(shape = actionShape, onClick = onExport, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.report_export)) }
 }
 
-/** Titolo, esito e limiti sono presentati nello stesso modo per tutte le sezioni. */
+/** Titolo, esito, tempo e limiti mantengono lo stesso ordine in tutte le sezioni. */
 @Composable
-private fun DiagnosticSectionCard(title: String, section: DiagnosticSection<*>, content: @Composable () -> Unit) {
+private fun DiagnosticSectionCard(title: String, section: DiagnosticSection<*>, emptyResource: Int = R.string.section_empty, content: @Composable () -> Unit) {
     InfoCard {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
-            Text(stringResource(section.state.resource))
-            section.readAt?.let { Text(stringResource(R.string.section_read_time, it.toString()), style = MaterialTheme.typography.bodySmall) }
-            section.problems.forEach { Text(it) }
-            content()
+            StatusBadge(
+                stringResource(if (section.state == SectionState.EMPTY) emptyResource else section.state.resource),
+                warning = section.state == SectionState.INCONCLUSIVE || section.state == SectionState.INTERRUPTED,
+                neutral = section.state == SectionState.NOT_PERFORMED || section.state == SectionState.UNSUPPORTED,
+            )
         }
+        section.readAt?.let { Text(stringResource(R.string.section_read_time, acquisitionTime(it)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        section.problems.forEach { Text(it, color = warningColor) }
+        content()
     }
+}
+
+/** Mantiene consultabile la provenienza completa senza appesantire l'elenco dei codici. */
+@Composable
+private fun DescriptionDetails(code: TroubleCode) {
+    var expanded by rememberSaveable(code.code, code.source, code.version) { mutableStateOf(false) }
+    val state = stringResource(if (expanded) R.string.ui_details_expanded else R.string.ui_details_collapsed)
+    TextButton(onClick = { expanded = !expanded }, modifier = Modifier.semantics { stateDescription = state }) { Text(stringResource(R.string.ui_description_details)) }
+    if (expanded) Text(stringResource(R.string.description_source, code.source.orEmpty(), code.version.orEmpty()), style = MaterialTheme.typography.bodySmall)
 }
 
 private val DtcKind.resource get() = when (this) {

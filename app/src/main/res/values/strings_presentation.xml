@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ui_app_title">MULTIPLA / OBD</string>
+    <string name="ui_vehicle">2005 · benzina + metano originale</string>
+    <string name="ui_tab_connection">Collegamento</string>
+    <string name="ui_tab_parameters">Parametri</string>
+    <string name="ui_tab_register">Registro</string>
+    <string name="ui_starting">Avvio Multipla OBD…</string>
+    <string name="ui_context_attempt">Tentativo</string>
+    <string name="ui_context_attempt_value">Diagnosi #%1$d</string>
+    <string name="ui_context_mode">Modalità</string>
+    <string name="ui_context_fuel">Alimentazione annotata</string>
+    <string name="ui_context_adapter">Adattatore</string>
+    <string name="ui_context_protocol">Protocollo</string>
+    <string name="ui_context_started">Inizio</string>
+    <string name="ui_context_ended">Fine</string>
+    <string name="ui_context_ended_value">%1$s · durata %2$d ms</string>
+    <string name="ui_codes_empty">Nessun codice restituito</string>
+    <string name="ui_frame_empty">Nessun frame restituito</string>
+    <string name="ui_description_details">Fonte della descrizione</string>
+    <string name="ui_details_expanded">Espansa</string>
+    <string name="ui_details_collapsed">Compressa</string>
+</resources>

@@ -196,6 +196,20 @@ della revisione sono nel [rapporto 0.3.1](docs/verification/app-D-0001-correzion
 La correzione concorrente dell’avvio è nel
 [rapporto 0.3.2](docs/verification/app-D-0001-avvio-verifica.md).
 
+La revisione visiva R1 di `app/D-0001`, confermata il 12 novembre 2026, aggiunge
+sette scenari in `features/presentation/diagnostic-interface.feature`.
+`PresentationScenariosTest` li esegue con Cucumber nello stesso ambiente
+Robolectric dei componenti Compose reali. La guard richiede tutti e sette gli
+identificatori, avvio e conclusione; pubblicazione esterna disabilitata.
+Il report JUnit aggrega l'esecuzione in un test, mentre i report Cucumber
+`app/build/reports/cucumber/presentation.json` e `.html` espongono i singoli
+scenari e passi. `PresentationRenderingTest` verifica inoltre le quattro
+schermate sulla demo applicativa e la raggiungibilità dei contenuti a 320
+density-independent pixel (dp)
+con caratteri ingranditi; le immagini del renderer Android sono in
+`app/build/reports/interface-r1/`. Esiti e limiti sono nel
+[rapporto R1](docs/verification/app-D-0001-interfaccia-r1-verifica.md).
+
 ## Consegna
 
 Indicare file esatti, documenti attuati, controlli eseguiti, risultati ed
